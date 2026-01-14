@@ -1,9 +1,11 @@
 import { createApp } from 'vue'
-import './style.css' // 默认的样式
+import './style.css'
 import App from './App.vue'
-import router from './router' // 引入路由
+import router from './router'
+import i18n from './i18n' // 引入 i18n
 
 const app = createApp(App)
 
-app.use(router) // 挂载
+app.use(router)
+app.use(i18n) // 挂载
 app.mount('#app')

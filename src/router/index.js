@@ -28,6 +28,12 @@ const router = createRouter({
       meta: { theme: 'pixel' }
     },
     {
+      path: '/mc/articles',
+      name: 'mc-articles',
+      component: () => import('../views/mc/Articles.vue'),
+      meta: { theme: 'pixel' }
+    },
+    {
       path: '/tech',
       name: 'tech-home',
       component: TechHome,
