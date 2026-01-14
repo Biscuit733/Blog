@@ -2,41 +2,47 @@ import { createI18n } from 'vue-i18n'
 
 const messages = {
   en: {
-    mc: {
-      // 导航
+    // 1. 通用部分
+    common: {
       back: 'Return to Hub',
-      
-      // About Page
-      status: 'STATUS',
-      equipment: 'EQUIPMENT',
-      skills: 'SKILL TREE',
-      
-      // Article Page
-      quest_board: 'Quest Board (Articles)',
-      quest_reward: 'Reward: Knowledge',
-      read_more: 'Accept Quest',
-      published: 'Published',
-      
-      // 之前的数据...
-      role: 'Role',
-      skill: 'Skill',
-      stability: 'Stability',
-      speed: 'Speed',
+      admin: '[Admin]',
       location: 'Suzhou, China',
       wechat: 'WeChat',
-      admin: '[Admin]'
+      loading: 'Loading Terrain...'
     },
-    // 保持之前的 armor 和 items 翻译不变...
-    armor: {
-      helmet_name: 'Diamond Helmet',
-      helmet_desc: 'Tech Lead',
-      chest_name: 'Elytra',
-      chest_desc: 'Architecture',
-      legs_name: 'Netherite Leggings',
-      legs_desc: '99.9%',
-      boots_name: 'Golden Boots',
-      boots_desc: 'Agile Dev'
+    // 2. 关于我页面 (独立命名空间)
+    about: {
+      stats_title: 'Statistics',
+      adv_title: 'Advancements',
+      mining_title: 'Skill Mining',
+      gallery_title: 'Photo Gallery (Paintings)', // 新增照片墙标题
+      
+      // NPC 对话 (数组形式)
+      npc_quotes: [
+        "Haa... (Hello traveler)",
+        "Hmm... (Nice code)",
+        "Do you have any bugs to trade?",
+        "Vue 3 is lighter than a feather.",
+        "I used to be an adventurer like you."
+      ],
+
+      // 统计标签
+      stat_code: 'Lines of Code',
+      stat_bug: 'Bugs Fixed',
+      stat_coffee: 'Coffee Consumed',
+      stat_project: 'Projects Built',
+
+      // 成就详情
+      adv_edu_title: 'The Beginning',
+      adv_edu_desc: 'Graduated from University',
+      adv_job1_title: 'Iron Pickaxe',
+      adv_job1_desc: 'First Internship',
+      adv_job2_title: 'Diamond Hunter',
+      adv_job2_desc: 'Promoted to Senior Dev',
+      adv_goal_title: 'A Furious Cocktail',
+      adv_goal_desc: 'Full Stack Mastery',
     },
+    // 装备和物品保持不变 (可以归类到 common 或 items，这里暂存)
     items: {
       vue: 'Core Weapon',
       react: 'Dual Wield',
@@ -45,45 +51,45 @@ const messages = {
       node: 'Redstone Power',
       docker: 'Shulker Box',
       figma: 'Pixel Art',
-      git: 'Time Travel',
-      coffee: 'Restores Energy'
+      git: 'Time Travel'
     }
   },
   zh: {
-    mc: {
-      // 导航
+    common: {
       back: '返回大厅',
-      
-      // About Page
-      status: '玩家状态',
-      equipment: '当前装备',
-      skills: '技能树',
-      
-      // Article Page
-      quest_board: '冒险者公会 (文章列表)',
-      quest_reward: '任务奖励: 知识 +1',
-      read_more: '接受任务',
-      published: '发布于',
-      
-      // 之前的数据...
-      role: '职业',
-      skill: '技能',
-      stability: '稳定性',
-      speed: '敏捷度',
+      admin: '[管理员]',
       location: '江苏 苏州',
       wechat: '微信号',
-      admin: '[管理员]'
+      loading: '正在生成地形...'
     },
-    // 保持 armor 和 items 不变...
-    armor: {
-      helmet_name: '钻石头盔',
-      helmet_desc: '技术负责人 (Tech Lead)',
-      chest_name: '鞘翅',
-      chest_desc: '架构设计 (Architecture)',
-      legs_name: '下界合金护腿',
-      legs_desc: '系统稳定性 99.9%',
-      boots_name: '金靴子',
-      boots_desc: '敏捷开发 (Agile)'
+    about: {
+      stats_title: '统计信息',
+      adv_title: '进度 (工作经历)',
+      mining_title: '技能挖掘',
+      gallery_title: '相册 (画廊)',
+      
+      // NPC 对话 (中文)
+      npc_quotes: [
+        "哈... (你好旅行者)",
+        "恩... (代码写得不错)",
+        "你有什么 Bug 要交易吗？",
+        "Vue 3 比羽毛还轻...",
+        "我以前和你一样也是个冒险家..."
+      ],
+
+      stat_code: '代码行数',
+      stat_bug: '已修复 Bug',
+      stat_coffee: '消耗咖啡',
+      stat_project: '完成项目',
+
+      adv_edu_title: '故事的开始',
+      adv_edu_desc: '大学毕业',
+      adv_job1_title: '铁镐时代',
+      adv_job1_desc: '第一份实习工作',
+      adv_job2_title: '钻石猎人',
+      adv_job2_desc: '晋升高级开发',
+      adv_goal_title: '狂乱的鸡尾酒',
+      adv_goal_desc: '全栈大师成就',
     },
     items: {
       vue: '核心武器 | 熟练度 100%',
@@ -93,8 +99,7 @@ const messages = {
       node: '服务端红石电路',
       docker: '容器化潜影盒',
       figma: '像素画板',
-      git: '时光回溯指南针',
-      coffee: '回复 20 点精力值'
+      git: '时光回溯指南针'
     }
   }
 }

@@ -4,20 +4,12 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 
 const router = useRouter()
-const { t } = useI18n()
+const { t, tm } = useI18n() // tm 用于获取数组类型的翻译资源
 const isLoading = ref(true)
+const showDialog = ref(false)
+const dialogText = ref('')
 
-// --- 音效预留 ---
-const playSound = (type) => {
-  // console.log(`Play sound: ${type}`)
-  // const audio = new Audio(`/sounds/${type}.mp3`)
-  // audio.play()
-}
-
-// --- 数据层 ---
-const profile = ref({ armor: [], inventory: [], skinUrl: '', wechat: '' })
-
-// 模拟 API
+// --- 模拟数据 ---
 const fetchProfileData = () => {
   return new Promise((resolve) => {
     setTimeout(() => {
@@ -25,114 +17,149 @@ const fetchProfileData = () => {
         username: 'biscuit',
         skinUrl: 'https://minotar.net/armor/body/conedox/100.png', 
         wechat: 'YaNtAngoo',
-        location: 'Suzhou, CN',
         level: 25,
         xp: 85,
         
-        // 装备数据
-        armor: [
-          { id: 'helmet', nameKey: 'armor.helmet_name', descKey: 'armor.helmet_desc', iconText: '💎' },
-          { id: 'chest', nameKey: 'armor.chest_name', descKey: 'armor.chest_desc', iconText: '🕊️' },
-          { id: 'legs', nameKey: 'armor.legs_name', descKey: 'armor.legs_desc', iconText: '👖' },
-          { id: 'boots', nameKey: 'armor.boots_name', descKey: 'armor.boots_desc', iconText: '👢' }
+        // 统计 (Keys updated)
+        stats: [
+          { labelKey: 'about.stat_code', value: '1.2M', icon: '📜' },
+          { labelKey: 'about.stat_bug', value: '404', icon: '🕷️' },
+          { labelKey: 'about.stat_coffee', value: '2,048', icon: '☕' },
+          { labelKey: 'about.stat_project', value: '42', icon: '📦' }
         ],
 
-        // 技能矿石
+        // 成就 (Keys updated)
+        advancements: [
+          { id: 1, titleKey: 'about.adv_edu_title', descKey: 'about.adv_edu_desc', date: '2019', icon: '🌱', type: 'normal' },
+          { id: 2, titleKey: 'about.adv_job1_title', descKey: 'about.adv_job1_desc', date: '2020', icon: '⛏️', type: 'normal' },
+          { id: 3, titleKey: 'about.adv_job2_title', descKey: 'about.adv_job2_desc', date: '2022', icon: '💎', type: 'challenge' },
+          { id: 4, titleKey: 'about.adv_goal_title', descKey: 'about.adv_goal_desc', date: 'Now', icon: '🧪', type: 'goal' }
+        ],
+
+        // 技能
         skills: [
-          { name: 'Vue.js', descKey: 'items.vue', icon: 'https://cdn.svgporn.com/logos/vue.svg', isMined: false, oreType: 'diamond' },
-          { name: 'React', descKey: 'items.react', icon: 'https://cdn.svgporn.com/logos/react.svg', isMined: false, oreType: 'lapis' },
-          { name: 'TypeScript', descKey: 'items.ts', icon: 'https://cdn.svgporn.com/logos/typescript-icon.svg', isMined: false, oreType: 'gold' },
-          { name: 'Node.js', descKey: 'items.node', icon: 'https://cdn.svgporn.com/logos/nodejs-icon.svg', isMined: false, oreType: 'emerald' },
-          { name: 'Docker', descKey: 'items.docker', icon: 'https://cdn.svgporn.com/logos/docker-icon.svg', isMined: false, oreType: 'iron' },
-          { name: 'Git', descKey: 'items.git', icon: 'https://cdn.svgporn.com/logos/git-icon.svg', isMined: false, oreType: 'redstone' },
+          { name: 'Vue.js', icon: 'https://cdn.svgporn.com/logos/vue.svg', isMined: false, oreType: 'diamond' },
+          { name: 'React', icon: 'https://cdn.svgporn.com/logos/react.svg', isMined: false, oreType: 'lapis' },
+          { name: 'TypeScript', icon: 'https://cdn.svgporn.com/logos/typescript-icon.svg', isMined: false, oreType: 'gold' },
+          { name: 'Node.js', icon: 'https://cdn.svgporn.com/logos/nodejs-icon.svg', isMined: false, oreType: 'emerald' },
+          { name: 'Docker', icon: 'https://cdn.svgporn.com/logos/docker-icon.svg', isMined: false, oreType: 'iron' },
+          { name: 'Git', icon: 'https://cdn.svgporn.com/logos/git-icon.svg', isMined: false, oreType: 'redstone' },
+          { name: 'Figma', icon: 'https://cdn.svgporn.com/logos/figma.svg', isMined: false, oreType: 'coal' },
         ],
 
-        // 兴趣爱好 (新增)
-        hobbies: [
-          { id: 'fps', name: 'CS:GO / Delta Force', icon: '🔫', desc: 'Rush B! (Global Elite)', type: 'game' },
-          { id: 'moba', name: 'League of Legends', icon: '⚔️', desc: 'Mid Laner', type: 'game' },
-          { id: 'food', name: 'Desserts', icon: '🍰', desc: 'Sweet Tooth', type: 'life' },
-          { id: 'mc', name: 'Minecraft', icon: '🧊', desc: 'Redstone Engineer', type: 'game' }
+        // 新增：照片墙 (模拟画作)
+        photos: [
+          { id: 1, url: 'https://picsum.photos/300/200?random=1', title: 'My Workstation' },
+          { id: 2, url: 'https://picsum.photos/200/200?random=2', title: 'Cat' },
+          { id: 3, url: 'https://picsum.photos/300/200?random=3', title: 'Travel' },
+          { id: 4, url: 'https://picsum.photos/200/300?random=4', title: 'Coffee Time' }
         ]
       })
     }, 500)
   })
 }
 
+const profile = ref({ stats: [], advancements: [], skills: [], photos: [] })
+
 onMounted(async () => {
   profile.value = await fetchProfileData()
   isLoading.value = false
 })
 
-// --- 交互 ---
+// --- 交互逻辑 ---
+const handleCharClick = () => {
+  // 从 i18n 获取当前语言的数组
+  const quotes = tm('about.npc_quotes') 
+  const randomQuote = quotes[Math.floor(Math.random() * quotes.length)]
+  
+  dialogText.value = randomQuote
+  showDialog.value = true
+  setTimeout(() => { showDialog.value = false }, 3000)
+}
+
 const mineBlock = (index) => {
   const skill = profile.value.skills[index]
   if (skill.isMined) return
-  playSound('dig')
+
+  // 1. 获取 DOM 并添加 shake 类
   const el = document.getElementById(`ore-${index}`)
-  el.classList.add('shake-anim')
+  if(el) {
+    el.classList.remove('shake-anim') // 先移除以便重置
+    void el.offsetWidth // 触发重绘
+    el.classList.add('shake-anim') // 再添加
+  }
+  
+  // 2. 延迟后破碎
   setTimeout(() => {
     skill.isMined = true
-    playSound('pop')
-  }, 200)
+  }, 300)
 }
 
-const handleArmorClick = () => playSound('click')
-const goBack = () => { playSound('click'); router.push('/mc') }
+const goBack = () => router.push('/mc')
 </script>
 
 <template>
-  <div class="base-container">
+  <div class="deepslate-container">
     
     <div class="hud-header">
-      <button class="mc-btn back-btn" @click="goBack">&lt; {{ t('mc.back') }}</button>
-      <div class="hud-status">
-        <div class="heart-row">❤️❤️❤️❤️❤️❤️❤️❤️❤️🖤</div>
-        <div class="xp-row">
-          <span class="xp-text">Lv.{{ profile.level }}</span>
-          <div class="xp-bar"><div class="xp-fill" :style="`width: ${profile.xp}%`"></div></div>
-        </div>
+      <button class="mc-btn back-btn" @click="goBack">&lt; {{ t('common.back') }}</button>
+      <div class="hud-info">
+        <span class="location-text">📍 {{ t('common.location') }}</span>
       </div>
     </div>
 
-    <div class="main-layout" v-if="!isLoading">
+    <div class="main-content" v-if="!isLoading">
       
-      <div class="left-panel">
-        <div class="bookshelf-bg"></div>
-
-        <div class="character-stage">
-          <div class="nametag">
-            <span class="rank">{{ t('mc.admin') }}</span> {{ profile.username }}
-          </div>
+      <div class="left-column">
+        
+        <div class="char-wrapper" @click="handleCharClick">
+          <Transition name="fade">
+            <div class="speech-bubble" v-if="showDialog">{{ dialogText }}</div>
+          </Transition>
+          <div class="nametag"><span class="rank">{{ t('common.admin') }}</span> {{ profile.username }}</div>
           <img :src="profile.skinUrl" class="skin-model floating" />
           <div class="pedestal"></div>
         </div>
 
-        <div class="armor-rack">
-          <div v-for="(item, idx) in profile.armor" :key="idx" class="armor-slot" @click="handleArmorClick">
-            <span class="slot-icon">{{ item.iconText }}</span>
-            <div class="slot-tooltip">
-              <div class="tt-title">{{ t(item.nameKey) }}</div>
-              <div class="tt-desc">{{ t(item.descKey) }}</div>
+        <div class="stats-board">
+          <div class="board-header">{{ t('about.stats_title') }}</div>
+          <div class="stats-list">
+            <div v-for="(stat, idx) in profile.stats" :key="idx" class="stat-row">
+              <span class="stat-icon">{{ stat.icon }}</span>
+              <span class="stat-label">{{ t(stat.labelKey) }}</span>
+              <span class="stat-value">{{ stat.value }}</span>
             </div>
           </div>
-        </div>
-        
-        <div class="hologram-base">
-          <div class="hologram-beam">
-            <div class="holo-text">
-              <p>📍 {{ profile.location }}</p>
-              <p>💬 {{ profile.wechat }}</p>
-            </div>
-          </div>
-          <div class="holo-emitter"></div>
         </div>
       </div>
 
-      <div class="right-panel">
+      <div class="right-column">
         
-        <div class="panel-section">
-          <h2 class="section-title">⛏️ Mining Skills</h2>
+        <div class="section-box stone-bg">
+          <div class="section-header">🏆 {{ t('about.adv_title') }}</div>
+          <div class="advancement-scroll-area">
+            <div class="tree-line"></div>
+            
+            <div 
+              v-for="(adv, idx) in profile.advancements" 
+              :key="idx" 
+              class="adv-node-wrapper"
+            >
+              <div class="adv-icon-box" :class="adv.type">
+                <div class="adv-icon">{{ adv.icon }}</div>
+              </div>
+              
+              <div class="adv-popup">
+                <div class="adv-title" :class="adv.type">{{ t(adv.titleKey) }}</div>
+                <div class="adv-desc">{{ t(adv.descKey) }}</div>
+                <div class="adv-date">{{ adv.date }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-box cobble-bg">
+          <div class="section-header">⛏️ {{ t('about.mining_title') }}</div>
           <div class="ore-grid">
             <div 
               v-for="(skill, index) in profile.skills" 
@@ -142,153 +169,195 @@ const goBack = () => { playSound('click'); router.push('/mc') }
               :class="[`ore-${skill.oreType}`, { 'broken': skill.isMined }]"
               @click="mineBlock(index)"
             >
-              <div class="block-face front" v-if="!skill.isMined">
-                <div class="ore-texture"></div>
+              <div class="block-face" v-if="!skill.isMined">
+                <div class="ore-specks"></div>
               </div>
-              <div class="revealed-card" v-else>
-                <img :src="skill.icon" class="skill-icon" />
-                <div class="skill-name">{{ skill.name }}</div>
+              <div class="revealed-content" v-else>
+                <img :src="skill.icon" />
+                <span>{{ skill.name }}</span>
               </div>
             </div>
           </div>
         </div>
 
-        <div class="panel-section">
-          <h2 class="section-title">🎮 Hobbies & Loot</h2>
-          <div class="item-frame-grid">
-            <div v-for="(hobby, idx) in profile.hobbies" :key="idx" class="item-frame">
-              <div class="frame-bg"></div>
-              <div class="frame-content">
-                <span class="hobby-icon">{{ hobby.icon }}</span>
-              </div>
-              <div class="frame-tooltip">
-                <div class="tt-title">{{ hobby.name }}</div>
-                <div class="tt-desc">{{ hobby.desc }}</div>
-              </div>
+        <div class="section-box wood-bg">
+          <div class="section-header">🖼️ {{ t('about.gallery_title') }}</div>
+          <div class="photo-grid">
+            <div v-for="photo in profile.photos" :key="photo.id" class="painting-frame">
+              <img :src="photo.url" class="painting-img" loading="lazy" />
+              <div class="painting-label">{{ photo.title }}</div>
             </div>
           </div>
         </div>
 
       </div>
     </div>
-
-    <div v-if="isLoading" class="loading-screen">Loading Base...</div>
+    
+    <div v-if="isLoading" class="loading">{{ t('common.loading') }}</div>
   </div>
 </template>
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
 
-/* 全局容器 */
-.base-container {
+/* === 全局容器 === */
+.deepslate-container {
   width: 100vw; height: 100vh; overflow: hidden;
-  background-color: #111; color: #fff; font-family: 'VT323', monospace;
-  /* 背景图稍后用 AI 生成的替换 */
-  background-image: radial-gradient(circle at 30% 50%, rgba(20,20,30,1) 0%, rgba(10,10,10,1) 100%);
+  background-color: #2f2f2f;
+  /* 修复：使用更自然的深色噪点背景，而不是之前的方块平铺 */
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjMmYyZjJmIi8+CjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiMzMzMiLz4KPC9zdmc+');
+  font-family: 'VT323', monospace; color: #fff;
+  display: flex; flex-direction: column;
 }
 
-.hud-header { height: 60px; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.6); border-bottom: 2px solid #555; z-index: 50; }
-.mc-btn.back-btn { background: #777; border: 2px solid #fff; color: #fff; padding: 5px 10px; cursor: pointer; font-family: inherit; font-size: 1.2rem; }
-.hud-status { text-align: right; }
-.heart-row { font-size: 1.2rem; }
-.xp-row { display: flex; align-items: center; gap: 5px; }
-.xp-bar { width: 100px; height: 6px; background: #333; border: 1px solid #aaa; }
-.xp-fill { height: 100%; background: #0f0; }
+.hud-header {
+  height: 60px; padding: 0 20px; display: flex; align-items: center; justify-content: space-between;
+  background: rgba(0,0,0,0.5); border-bottom: 2px solid #111; z-index: 50;
+}
+.mc-btn { background: #555; border: 2px solid #fff; border-bottom-color: #333; border-right-color: #333; color: #fff; padding: 5px 12px; cursor: pointer; font-family: inherit; font-size: 1.2rem; }
 
-.main-layout { display: flex; height: calc(100vh - 60px); }
+.main-content { display: flex; height: calc(100vh - 60px); }
 
-/* --- 左侧：指挥中心 --- */
-.left-panel {
-  flex: 3; background: rgba(0,0,0,0.4);
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  border-right: 4px solid #333; position: relative;
-  /* 增加一点内阴影，制造空间感 */
-  box-shadow: inset -10px 0 20px rgba(0,0,0,0.5);
+/* === 左侧固定栏 === */
+.left-column {
+  width: 320px; flex-shrink: 0;
+  background: rgba(0,0,0,0.3); border-right: 4px solid #1a1a1a;
+  display: flex; flex-direction: column; align-items: center; padding-top: 30px; gap: 20px;
 }
 
-/* 装饰：书架背景 */
-.bookshelf-bg {
-  position: absolute; top: 10%; left: 10%; width: 80%; height: 60%;
-  border: 4px solid #533; background: repeating-linear-gradient(0deg, #643 0, #643 20px, #421 20px, #421 24px);
-  opacity: 0.3; z-index: 0;
+.char-wrapper { position: relative; cursor: pointer; }
+.skin-model { height: 260px; image-rendering: pixelated; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.6)); }
+.floating { animation: float 3s ease-in-out infinite; }
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+.nametag { text-align: center; background: rgba(0,0,0,0.6); padding: 2px 8px; border: 1px solid #aaa; margin-bottom: 8px; }
+.rank { color: #FFAA00; }
+.pedestal { width: 100px; height: 30px; background: #333; border: 2px solid #111; transform: perspective(300px) rotateX(40deg) translateY(-15px); margin: 0 auto; }
+
+.speech-bubble {
+  position: absolute; top: -50px; left: 50%; transform: translateX(-50%);
+  background: #fff; color: #000; padding: 8px; border-radius: 4px; border: 2px solid #000;
+  width: 180px; text-align: center; z-index: 20; box-shadow: 4px 4px 0 rgba(0,0,0,0.4);
 }
 
-.character-stage { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; }
-.skin-model { height: 35vh; image-rendering: pixelated; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.6)); }
+.stats-board { width: 280px; background: #c6c6c6; border: 2px solid #000; box-shadow: 4px 4px 0 rgba(0,0,0,0.5); }
+.board-header { background: #444; color: #fff; text-align: center; padding: 4px; font-size: 1.2rem; }
+.stats-list { padding: 10px; display: flex; flex-direction: column; gap: 5px; color: #333; }
+.stat-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #999; }
+.stat-value { font-weight: bold; color: #008800; }
 
-/* 浮动动画 */
-.floating { animation: float 4s ease-in-out infinite; }
-@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
-
-.pedestal { width: 100px; height: 30px; background: #444; border: 2px solid #222; transform: perspective(300px) rotateX(40deg) translateY(-15px); }
-.nametag { background: rgba(0,0,0,0.6); padding: 2px 8px; border: 1px solid #aaa; margin-bottom: 10px; }
-.rank { color: #FFAA00; font-weight: bold; }
-
-.armor-rack { display: flex; gap: 10px; margin: 20px 0; z-index: 2; }
-.armor-slot { width: 44px; height: 44px; background: #888; border: 2px solid #fff; border-right-color: #555; border-bottom-color: #555; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; }
-.armor-slot:active { border-color: #555; border-right-color: #fff; border-bottom-color: #fff; transform: translateY(2px); }
-.slot-icon { font-size: 24px; filter: drop-shadow(2px 2px 0 rgba(0,0,0,0.5)); }
-
-/* 全息信息台 */
-.hologram-base { position: relative; margin-top: auto; margin-bottom: 30px; display: flex; flex-direction: column; align-items: center; z-index: 2; }
-.holo-emitter { width: 80px; height: 10px; background: #0ff; box-shadow: 0 0 10px #0ff; border-radius: 50%; }
-.hologram-beam {
-  width: 140px; padding: 10px;
-  background: linear-gradient(to top, rgba(0, 255, 255, 0.2), transparent);
-  border-left: 1px solid rgba(0,255,255,0.3); border-right: 1px solid rgba(0,255,255,0.3);
-  clip-path: polygon(0 0, 100% 0, 80% 100%, 20% 100%);
-  margin-bottom: 5px; text-align: center;
+/* === 右侧滚动区 === */
+.right-column {
+  flex: 1; padding: 30px; overflow-y: auto;
+  display: flex; flex-direction: column; gap: 30px;
 }
-.holo-text { color: #0ff; font-size: 1rem; text-shadow: 0 0 5px #0ff; animation: hologram-flicker 3s infinite; }
-@keyframes hologram-flicker { 0%, 100% { opacity: 0.8; } 50% { opacity: 0.5; } 52% { opacity: 0.2; } 54% { opacity: 0.8; } }
+.right-column::-webkit-scrollbar { width: 12px; background: #111; }
+.right-column::-webkit-scrollbar-thumb { background: #666; border: 2px solid #111; }
 
-/* --- 右侧：功能区 --- */
-.right-panel { flex: 7; padding: 30px 50px; overflow-y: auto; display: flex; flex-direction: column; gap: 40px; }
-.section-title { font-size: 2.5rem; color: #ddd; margin-bottom: 20px; border-bottom: 2px dashed #555; padding-bottom: 5px; text-shadow: 2px 2px 0 #000; }
+/* 通用板块样式 */
+.section-box {
+  background: rgba(0,0,0,0.4); border: 4px solid #111; padding: 20px;
+  position: relative; border-radius: 4px;
+}
+/* 修复背景：只用简单的纹理 */
+.stone-bg { background: repeating-linear-gradient(45deg, rgba(255,255,255,0.03) 0, rgba(255,255,255,0.03) 10px, transparent 10px, transparent 20px); }
+.section-header {
+  font-size: 1.8rem; color: #eee; margin-bottom: 20px; 
+  text-shadow: 2px 2px 0 #000; display: inline-block; border-bottom: 3px solid #555;
+}
 
-/* 矿石网格 */
-.ore-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 15px; }
-.ore-block { width: 100%; aspect-ratio: 1; background: #666; position: relative; cursor: pointer; box-shadow: inset 4px 4px 0 #888, inset -4px -4px 0 #444; transition: transform 0.1s; }
-.ore-block:hover { transform: scale(1.05); }
-.ore-block.broken { background: rgba(255,255,255,0.1); box-shadow: none; border: 2px dashed #555; transform: none; }
-.ore-texture { width: 100%; height: 100%; position: relative; }
-.ore-texture::before { content: ''; position: absolute; width: 20%; height: 20%; top: 20%; left: 30%; background: currentColor; box-shadow: 30px 30px 0 currentColor; }
-.ore-diamond { color: #0ff; } .ore-gold { color: gold; } .ore-redstone { color: #f00; } .ore-lapis { color: blue; } .ore-emerald { color: #0f0; } .ore-iron { color: #dcb; }
-.revealed-card { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; animation: pop-in 0.3s; }
-.skill-icon { width: 40px; height: 40px; margin-bottom: 5px; }
-.skill-name { font-size: 1rem; color: #fff; }
-
-/* 物品展示框 (Hobbies) */
-.item-frame-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 20px; }
-.item-frame {
-  width: 120px; height: 120px; position: relative;
+/* --- 1. 成就树 (修复旋转问题) --- */
+.advancement-scroll-area {
+  display: flex; align-items: center; gap: 60px; padding: 30px 10px;
+  overflow-x: auto; position: relative;
+}
+.tree-line {
+  position: absolute; top: 50%; left: 0; width: 100%; height: 4px; background: #000; z-index: 0;
+}
+.adv-node-wrapper {
+  position: relative; width: 64px; height: 64px; flex-shrink: 0; z-index: 1;
+}
+.adv-icon-box {
+  width: 100%; height: 100%; background: #333; border: 2px solid #777;
   display: flex; align-items: center; justify-content: center;
-  cursor: pointer; transition: transform 0.2s;
+  transition: transform 0.2s; cursor: help;
 }
-.item-frame:hover { transform: scale(1.1); z-index: 10; }
+/* 挑战成就旋转 */
+.adv-icon-box.challenge { transform: rotate(45deg); border-color: #a0a; }
+.adv-icon-box.challenge .adv-icon { transform: rotate(-45deg); } /* 图标转回来 */
 
-/* 棕色背景框 */
-.frame-bg {
-  position: absolute; width: 100%; height: 100%;
-  background: #5c3a21; border: 4px solid #3e2714;
-  box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 5px 5px 10px rgba(0,0,0,0.5);
+.adv-node-wrapper:hover .adv-icon-box { background: #555; transform: scale(1.1); }
+.adv-node-wrapper:hover .adv-icon-box.challenge { transform: rotate(45deg) scale(1.1); }
+
+.adv-icon { font-size: 30px; filter: drop-shadow(2px 2px 0 #000); }
+
+/* Tooltip (位置修正) */
+.adv-popup {
+  position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%);
+  width: 200px; background: #100010; border: 2px solid #50f; padding: 8px;
+  opacity: 0; pointer-events: none; transition: opacity 0.2s; text-align: center; z-index: 100;
+  box-shadow: 0 5px 10px rgba(0,0,0,0.5);
 }
-.frame-content { position: relative; z-index: 2; font-size: 50px; filter: drop-shadow(4px 4px 0 rgba(0,0,0,0.3)); }
+.adv-node-wrapper:hover .adv-popup { opacity: 1; }
+.adv-title { color: #ff5; margin-bottom: 4px; }
+.adv-title.challenge { color: #a0a; }
+.adv-desc { font-size: 0.9rem; color: #aaa; }
+.adv-date { font-size: 0.8rem; color: #555; margin-top: 5px; }
 
-.frame-tooltip {
-  position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%);
-  background: #100010; border: 2px solid #30f; color: #fff;
-  padding: 8px; width: 160px; text-align: center;
-  opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 20;
+/* --- 2. 矿石 (修复质感) --- */
+.ore-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 15px; }
+.ore-block {
+  width: 100%; aspect-ratio: 1; 
+  background-color: #757575; /* 基础灰色 */
+  position: relative; cursor: pointer;
+  /* 修复：3D 质感边框 */
+  box-shadow: inset 4px 4px 0 rgba(255,255,255,0.2), inset -4px -4px 0 rgba(0,0,0,0.4);
 }
-.item-frame:hover .frame-tooltip { opacity: 1; }
-.tt-title { color: #5ff; margin-bottom: 4px; font-size: 1.1rem; }
-.tt-desc { color: #aaa; font-size: 0.9rem; }
+.ore-block:hover { filter: brightness(1.1); }
 
-/* 简单的 Tooltip */
-.slot-tooltip { position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); background: #100010; border: 2px solid #30f; color: #fff; padding: 5px; width: 120px; text-align: center; opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 10; }
-.armor-slot:hover .slot-tooltip { opacity: 1; }
+/* 抖动动画 */
+.shake-anim { animation: shake 0.3s cubic-bezier(.36,.07,.19,.97) both; }
+@keyframes shake {
+  10%, 90% { transform: translate3d(-1px, 0, 0); }
+  20%, 80% { transform: translate3d(2px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+  40%, 60% { transform: translate3d(4px, 0, 0); }
+}
+
+.ore-specks { width: 100%; height: 100%; position: absolute; }
+.ore-specks::before, .ore-specks::after {
+  content: ''; position: absolute; width: 20%; height: 20%; background: currentColor;
+  box-shadow: 30px 20px 0 currentColor, 10px 50px 0 currentColor;
+}
+.ore-diamond { color: #00ffff; } .ore-lapis { color: #0000aa; } .ore-gold { color: gold; } 
+.ore-emerald { color: #00aa00; } .ore-iron { color: #d8af93; } .ore-redstone { color: #aa0000; } .ore-coal { color: #111; }
+
+.ore-block.broken {
+  background: rgba(0,0,0,0.3); box-shadow: none; border: 2px dashed #444;
+  display: flex; align-items: center; justify-content: center;
+  cursor: default;
+}
+.revealed-content { animation: pop-in 0.3s; text-align: center; }
+.revealed-content img { width: 40px; margin-bottom: 5px; }
+.revealed-content span { display: block; font-size: 0.8rem; color: #ddd; }
+
+/* --- 3. 照片墙 (画作风格) --- */
+.photo-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px;
+}
+.painting-frame {
+  background: #5c3317; /* 深木色 */
+  padding: 8px; box-shadow: 5px 5px 10px rgba(0,0,0,0.5);
+  transition: transform 0.2s; cursor: pointer;
+}
+.painting-frame:hover { transform: scale(1.03) rotate(1deg); z-index: 10; }
+.painting-img {
+  width: 100%; height: 150px; object-fit: cover;
+  border: 2px solid #3e220e; display: block;
+}
+.painting-label {
+  text-align: center; margin-top: 5px; color: #eebb99; font-size: 1.1rem;
+}
 
 @keyframes pop-in { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-.loading-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 2rem; z-index: 100; }
+.loading { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 2rem; }
 </style>
