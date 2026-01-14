@@ -35,3 +35,74 @@ body {
   border-right-color: #fff;
   border-bottom-color: #fff;
 }
+/* --- Minecraft 风格石头按钮 --- */
+/* src/assets/main.css */
+
+/* --- 新版 Minecraft 风格按钮 (清爽版) --- */
+.mc-button {
+  /* 1. 字体与基本设置 */
+  font-family: 'VT323', monospace; /* 继续使用像素字体 */
+  font-size: 24px;
+  color: #e0e0e0; /* 稍微带点灰的白色，看着更舒服 */
+  text-align: center;
+  line-height: 1;
+  text-decoration: none; /* 防止作为链接时有下划线 */
+
+  /* 2. 盒子模型与背景 */
+  display: inline-block;
+  padding: 10px 20px;
+  min-width: 120px;
+  /* 经典的 MC 按钮底色 */
+  background-color: #8b8b8b; 
+  
+  cursor: pointer;
+  user-select: none;
+  outline: none; /* 去掉浏览器默认聚焦框 */
+
+  /* 3. 核心：还原 MC 像素描边 (代替厚重的阴影) */
+  /* 外圈深色描边 */
+  border: 3px solid #2b2b2b; 
+  /* 内圈亮暗面，制造像素立体感 */
+  box-shadow: 
+    inset 3px 3px 0px #c6c6c6,  /* 左上亮面 (内阴影) */
+    inset -3px -3px 0px #5b5b5b; /* 右下暗面 (内阴影) */
+  
+  border-radius: 0; /* 必须直角 */
+  
+  /* 禁止平滑过渡，保持像素的硬朗感 */
+  transition: none; 
+}
+
+/* 悬停状态：整体变亮 */
+.mc-button:hover {
+  background-color: #9b9b9b; /* 背景变亮 */
+  box-shadow: 
+    inset 3px 3px 0px #dcdcdc,  /* 亮面更亮 */
+    inset -3px -3px 0px #6b6b6b; /* 暗面也稍微变亮 */
+}
+
+/* 点击状态：按下效果 (颜色反转) */
+.mc-button:active {
+  background-color: #7b7b7b; /* 背景变暗 */
+  /* 亮暗面对调，模拟凹陷 */
+  box-shadow: 
+    inset 3px 3px 0px #5b5b5b,  /* 左上变暗 */
+    inset -3px -3px 0px #c6c6c6; /* 右下变亮 */
+  /* 稍微向下位移一个像素，增加按压感 */
+  transform: translateY(2px); 
+}
+
+/* 禁用状态 */
+.mc-button:disabled,
+.mc-button.disabled {
+  color: #a0a0a0; /* 文字变暗灰 */
+  background-color: #6b6b6b; /* 背景变深灰 */
+  border-color: #3b3b3b; /* 边框也变暗 */
+  /* 失去立体感，变得扁平 */
+  box-shadow: 
+    inset 3px 3px 0px #8b8b8b,
+    inset -3px -3px 0px #4b4b4b;
+  cursor: not-allowed;
+  pointer-events: none;
+  transform: none; /* 禁用时不许动 */
+}

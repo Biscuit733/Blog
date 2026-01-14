@@ -15,6 +15,8 @@ const enterWorld = (type) => {
 
   setTimeout(() => {
     if (type === 'mc') {
+      // 只有点击这个按钮，浏览器里才会存下这个标记
+  sessionStorage.setItem('mc_one_time_sound', 'true')
       router.push('/mc')
     } else {
       router.push('/tech')

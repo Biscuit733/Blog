@@ -32,6 +32,12 @@ const router = createRouter({
       name: 'mc-articles',
       component: () => import('../views/mc/Articles.vue'),
       meta: { theme: 'pixel' }
+    },// 在 routes 数组中添加
+    {
+      path: '/mc/articles/:id', // 动态参数 :id
+      name: 'mc-article-detail',
+      component: () => import('../views/mc/ArticleDetail.vue'),
+      meta: { theme: 'pixel' }
     },
     {
       path: '/tech',

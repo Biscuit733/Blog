@@ -8,7 +8,23 @@ const { t, tm } = useI18n()
 const isLoading = ref(true)
 const showDialog = ref(false)
 const dialogText = ref('')
+// 定义音效
+const baseUrl = import.meta.env.BASE_URL || '/'
+const sfxClick = new Audio(baseUrl + 'sounds/click.ogg')
+const sfxPop = new Audio(baseUrl + 'sounds/pop.ogg')
+// 播放点击音 (给按钮用)
+const playClick = () => {
+  const s = sfxClick.cloneNode()
+  s.volume = 0.5
+  s.play()
+}
 
+// 播放悬停音 (给技能块用)
+const playHover = () => {
+  const s = sfxPop.cloneNode()
+  s.volume = 0.3
+  s.play()
+}
 const fetchProfileData = () => {
   return new Promise((resolve) => {
     setTimeout(() => {
@@ -23,6 +39,7 @@ const fetchProfileData = () => {
           { labelKey: 'mc.stat_project', value: '42', icon: '📦' }
         ],
 
+        // 这里的顺序很重要
         advancements: [
           { id: 1, titleKey: 'mc.adv_edu_title', descKey: 'mc.adv_edu_desc', date: '2019', icon: '🌱', type: 'normal' },
           { id: 2, titleKey: 'mc.adv_job1_title', descKey: 'mc.adv_job1_desc', date: '2020', icon: '⛏️', type: 'normal' },
@@ -85,7 +102,7 @@ const goBack = () => router.push('/mc')
   <div class="mc-container">
     
     <div class="hud-header">
-      <button class="mc-btn back-btn" @click="goBack">&lt; {{ t('mc.back') }}</button>
+      <button class="mc-btn back-btn"@click="goBack(); playClick()">&lt; {{ t('mc.back') }}</button>
       <div class="hud-info">
         <span class="location-text">📍 {{ t('mc.location') }}</span>
       </div>
@@ -94,22 +111,15 @@ const goBack = () => router.push('/mc')
     <div class="main-content" v-if="!isLoading">
       
       <div class="left-column">
-        
         <div class="char-wrapper" @click="handleCharClick">
-          
           <Transition name="pop-up">
             <div class="speech-bubble" v-if="showDialog">{{ dialogText }}</div>
           </Transition>
-          
           <div class="nametag"><span class="rank">{{ t('mc.admin') }}</span> {{ profile.username }}</div>
-          
           <div class="char-body">
             <img :src="profile.skinUrl" class="skin-model floating" />
-            
-            <div class="holo-base">
-              <div class="holo-ring"></div>
-              <div class="holo-particles"></div>
-            </div>
+            <div class="soft-spotlight"></div>
+            <div class="pedestal"></div>
           </div>
         </div>
 
@@ -133,7 +143,16 @@ const goBack = () => router.push('/mc')
           <div class="advancement-scroll-area">
             <div class="tree-line"></div>
             
-            <div v-for="(adv, idx) in profile.advancements" :key="idx" class="adv-node-wrapper">
+            <div 
+              v-for="(adv, idx) in profile.advancements" 
+              :key="idx" 
+              class="adv-node-wrapper"
+              :class="{ 
+                'first-item': idx === 0, 
+                'last-item': idx === profile.advancements.length - 1 
+              }"
+              @mouseenter="playHover"
+            >
               <div class="adv-icon-box" :class="adv.type">
                 <div class="adv-icon">{{ adv.icon }}</div>
               </div>
@@ -157,6 +176,7 @@ const goBack = () => router.push('/mc')
               class="ore-block"
               :class="[`ore-${skill.oreType}`, { 'broken': skill.isMined }]"
               @click="mineBlock(index)"
+              @mouseenter="playHover"
             >
               <div class="block-face" v-if="!skill.isMined">
                 <div class="ore-specks"></div>
@@ -192,14 +212,20 @@ const goBack = () => router.push('/mc')
 /* === 全局容器 === */
 .mc-container {
   width: 100vw; height: 100vh; 
-  overflow: hidden; /* 防止全局滚动条 */
+  overflow: hidden;
   background-color: #1a1a1a;
-  background-image: 
-    linear-gradient(45deg, #222 25%, transparent 25%, transparent 75%, #222 75%, #222),
-    linear-gradient(45deg, #222 25%, transparent 25%, transparent 75%, #222 75%, #222);
-  background-size: 32px 32px;
-  background-position: 0 0, 16px 16px;
-  box-shadow: inset 0 0 150px rgba(0,0,0,0.8);
+  
+  /* --- 修改开始 --- */
+  /* 1. 引用你的图片 */
+  background-image: url('/images/aboutBG.png'); 
+  /* 2. 确保图片覆盖全屏 */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  /* 3. 加一点暗色遮罩，防止背景太亮看不清文字 */
+  box-shadow: inset 0 0 0 1000px rgba(0, 0, 0, 0.6); 
+  /* --- 修改结束 --- */
+
   font-family: 'VT323', monospace; color: #fff;
 }
 
@@ -208,59 +234,53 @@ const goBack = () => router.push('/mc')
 
 .main-content { display: flex; height: calc(100vh - 60px); width: 100%; }
 
-/* === 左侧：修复气泡被遮挡的关键 === */
+/* === 左侧 === */
 .left-column {
   width: 340px; flex-shrink: 0; 
   background: rgba(0,0,0,0.4); border-right: 4px solid #1a1a1a; 
   display: flex; flex-direction: column; 
   align-items: center; 
-  /* 关键修改：取消垂直居中，改为 padding-top 布局 */
   padding-top: 100px; 
-  gap: 60px;
+  gap: 50px;
   position: relative; z-index: 20;
-  /* 关键修改：visible 允许气泡弹出 */
-  overflow: visible; 
+  overflow-y: auto; 
+  -ms-overflow-style: none; scrollbar-width: none;
 }
+.left-column::-webkit-scrollbar { display: none; }
 
-.char-wrapper { position: relative; cursor: pointer; text-align: center; z-index: 30; }
+.char-wrapper { position: relative; cursor: pointer; text-align: center; }
 .char-body { position: relative; margin-top: 10px; }
 
-/* === 灯光修复：全息霓虹环 === */
-.holo-base {
-  position: absolute; bottom: -25px; left: 50%; transform: translateX(-50%) perspective(300px) rotateX(60deg);
-  width: 140px; height: 140px;
-  display: flex; align-items: center; justify-content: center;
-  z-index: 0; pointer-events: none;
+/* 灯光 */
+.soft-spotlight {
+  position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%) scaleY(0.4);
+  width: 180px; height: 180px;
+  background: radial-gradient(circle, rgba(255,255,220,0.6) 0%, rgba(255,255,200,0.2) 50%, transparent 70%);
+  box-shadow: 0 0 30px rgba(255, 255, 200, 0.1);
+  filter: blur(8px);
+  pointer-events: none; z-index: 0;
 }
-.holo-ring {
-  width: 100%; height: 100%; border: 3px solid #0ff; border-radius: 50%;
-  box-shadow: 0 0 15px #0ff, inset 0 0 10px #0ff;
-  animation: spin 10s linear infinite; opacity: 0.7;
-}
-.holo-particles {
-  position: absolute; width: 80%; height: 80%; 
-  background: radial-gradient(circle, rgba(0,255,255,0.2) 0%, transparent 70%);
-  filter: blur(2px);
-}
-@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-.skin-model { height: 260px; image-rendering: pixelated; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.5)); position: relative; z-index: 2; }
+.skin-model { 
+  height: 260px; image-rendering: pixelated; position: relative; z-index: 2;
+  filter: drop-shadow(0 10px 15px rgba(0,0,0,0.8)) drop-shadow(0 0 2px rgba(255,255,200,0.5));
+}
 .floating { animation: float 3s ease-in-out infinite; }
 @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
 
 /* 气泡 */
 .speech-bubble {
-  position: absolute; top: -70px; left: 50%; transform: translateX(-50%);
+  position: absolute; top: -75px; left: 50%; transform: translateX(-50%);
   background: #fff; color: #000; padding: 10px; border-radius: 4px; border: 2px solid #000;
-  width: 180px; text-align: center; 
-  z-index: 9999; /* 确保层级最高 */
-  box-shadow: 4px 4px 0 rgba(0,0,0,0.4);
+  width: 200px; text-align: center; 
+  z-index: 9999; box-shadow: 4px 4px 0 rgba(0,0,0,0.4);
 }
 .speech-bubble::before { content: ''; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); border-width: 10px 10px 0; border-style: solid; border-color: #000 transparent transparent; }
 .pop-up-enter-active, .pop-up-leave-active { transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 .pop-up-enter-from, .pop-up-leave-to { opacity: 0; transform: translate(-50%, 10px) scale(0.8); }
 
-.nametag { display: inline-block; background: rgba(0,0,0,0.6); padding: 2px 8px; border: 1px solid #aaa; margin-bottom: 8px; }
+.nametag { display: inline-block; background: rgba(0,0,0,0.6); padding: 2px 8px; border: 1px solid #aaa; margin-bottom: 8px; position: relative; z-index: 10; }
+.pedestal { width: 90px; height: 25px; background: #333; border: 2px solid #111; transform: perspective(300px) rotateX(40deg) translateY(-15px); margin: 0 auto; z-index: 1; position: relative; }
 
 .stats-board { width: 260px; background: #c6c6c6; border: 2px solid #000; box-shadow: 4px 4px 0 rgba(0,0,0,0.5); position: relative; z-index: 10; }
 .board-header { background: #444; color: #fff; text-align: center; padding: 5px; font-size: 1.2rem; }
@@ -271,7 +291,7 @@ const goBack = () => router.push('/mc')
 /* === 右侧：内容区 === */
 .right-column { 
   flex: 1; padding: 30px 40px; 
-  overflow-y: auto; /* 只有这里可以滚动 */
+  overflow-y: auto; 
   display: flex; flex-direction: column; gap: 40px; 
 }
 .right-column::-webkit-scrollbar { width: 12px; background: #111; }
@@ -285,14 +305,13 @@ const goBack = () => router.push('/mc')
 .stone-bg { background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.02) 0, rgba(255,255,255,0.02) 10px, transparent 10px, transparent 20px); }
 .section-header { font-size: 1.8rem; color: #eee; margin-bottom: 10px; text-shadow: 2px 2px 0 #000; display: inline-block; border-bottom: 3px solid #555; }
 
-/* --- 核心修复：成就树左侧截断问题 --- */
+/* --- 成就树 --- */
 .advancement-scroll-area { 
   display: flex; align-items: center; gap: 60px; 
-  padding: 100px 20px 40px 20px; /* Padding 是关键 */
+  padding: 100px 20px 40px 20px; 
   margin-top: -60px; 
   overflow-x: auto; min-height: 150px; 
 }
-/* 线条绝对垂直居中 */
 .tree-line { position: absolute; top: 60%; left: 0; width: 100%; height: 4px; background: #000; z-index: 0; }
 .adv-node-wrapper { position: relative; width: 64px; height: 64px; flex-shrink: 0; z-index: 1; display: flex; align-items: center; justify-content: center; }
 
@@ -308,21 +327,26 @@ const goBack = () => router.push('/mc')
 .adv-node-wrapper:hover .adv-icon-box.challenge { transform: rotate(45deg) scale(1.1); }
 .adv-icon { font-size: 30px; filter: drop-shadow(2px 2px 0 #000); }
 
-/* Tooltip 定位逻辑 */
+/* --- 修复 1: Tooltip 智能定位 & 强制居中 --- */
 .adv-popup {
   position: absolute; bottom: 85px; 
   left: 50%; transform: translateX(-50%); /* 默认居中 */
   width: 220px; background: #100010; border: 2px solid #50f; padding: 8px;
-  opacity: 0; pointer-events: none; transition: opacity 0.2s; text-align: center; 
+  opacity: 0; pointer-events: none; transition: opacity 0.2s; 
+  text-align: center; /* 关键：强制文字居中 */
   z-index: 999; box-shadow: 0 5px 15px rgba(0,0,0,0.8);
 }
-/* 第一个元素：左对齐，防止切边 */
-.adv-node-wrapper:first-child .adv-popup {
-  left: 0; transform: none; text-align: left;
+
+/* 第一个元素：盒子左对齐，但文字保持居中 */
+.adv-node-wrapper.first-item .adv-popup {
+  left: 0; transform: none; 
+  text-align: center; /* 确保文字居中 */
 }
-/* 最后一个元素：右对齐 */
-.adv-node-wrapper:last-child .adv-popup {
-  left: auto; right: 0; transform: none; text-align: right;
+
+/* 最后一个元素：盒子右对齐，但文字保持居中 */
+.adv-node-wrapper.last-item .adv-popup {
+  left: auto; right: 0; transform: none; 
+  text-align: center; /* 确保文字居中 */
 }
 
 .adv-node-wrapper:hover .adv-popup { opacity: 1; }

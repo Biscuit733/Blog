@@ -1,10 +1,22 @@
-<template>
-  <router-view></router-view>
-</template>
-
 <script setup>
-// 这里不需要写什么逻辑了
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
+import McCursor from './components/McCursor.vue' // 引入刚才写的组件
+
+const route = useRoute()
+
+// 判断是否是 MC 风格页面
+// 只要路由路径里包含 '/mc' 就认为是 MC 页面
+const isMcPage = computed(() => {
+  return route.path.startsWith('/mc')
+})
 </script>
+
+<template>
+  <McCursor v-if="isMcPage" />
+  
+  <router-view />
+</template>
 
 <style>
 /* 全局样式控制
