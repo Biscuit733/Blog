@@ -1,0 +1,47 @@
+// src/router/index.js
+import { createRouter, createWebHistory } from 'vue-router'
+
+// 懒加载引入（更高效）
+const Gateway = () => import('../views/Gateway.vue')
+const McHome = () => import('../views/mc/Home.vue')
+const TechHome = () => import('../views/tech/Home.vue')
+
+const router = createRouter({
+  history: createWebHistory(import.meta.env.BASE_URL),
+  routes: [
+    {
+      path: '/',
+      name: 'gateway',
+      component: Gateway,
+      meta: { theme: 'default' }
+    },
+    {
+      path: '/mc',
+      name: 'mc-home',
+      component: McHome,
+      meta: { theme: 'pixel' } // 标记：这是像素世界
+    },
+    {
+      path: '/mc/about',
+      name: 'mc-about',
+      component: () => import('../views/mc/About.vue'),
+      meta: { theme: 'pixel' }
+    },
+    {
+      path: '/tech',
+      name: 'tech-home',
+      component: TechHome,
+      meta: { theme: 'modern' } // 标记：这是现代世界
+    }
+  ]
+})
+
+// --- 全局样式切换魔法 ---
+// 每次路由跳转后，根据 meta.theme 自动修改 body 的 class
+// 这样你的 MC 字体就不会污染 现代风格 页面了
+router.afterEach((to) => {
+  const theme = to.meta.theme || 'default'
+  document.body.className = theme
+})
+
+export default router
