@@ -9,6 +9,7 @@ const isLoading = ref(true)
 const showDialog = ref(false)
 const dialogText = ref('')
 
+// --- 模拟数据 ---
 const fetchProfileData = () => {
   return new Promise((resolve) => {
     setTimeout(() => {
@@ -16,7 +17,6 @@ const fetchProfileData = () => {
         username: 'biscuit',
         skinUrl: 'https://minotar.net/armor/body/conedox/100.png', 
         
-        // 统计
         stats: [
           { labelKey: 'mc.stat_code', value: '1.2M', icon: '📜' },
           { labelKey: 'mc.stat_bug', value: '404', icon: '🕷️' },
@@ -24,15 +24,14 @@ const fetchProfileData = () => {
           { labelKey: 'mc.stat_project', value: '42', icon: '📦' }
         ],
 
-        // 成就
+        // 这里的 type 决定边框颜色: normal(灰), challenge(紫), goal(金)
         advancements: [
           { id: 1, titleKey: 'mc.adv_edu_title', descKey: 'mc.adv_edu_desc', date: '2019', icon: '🌱', type: 'normal' },
           { id: 2, titleKey: 'mc.adv_job1_title', descKey: 'mc.adv_job1_desc', date: '2020', icon: '⛏️', type: 'normal' },
-          { id: 3, titleKey: 'mc.adv_job2_title', descKey: 'mc.adv_job2_desc', date: '2022', icon: '💎', type: 'challenge' },
+          { id: 3, titleKey: 'mc.adv_job2_title', descKey: 'mc.adv_job2_desc', date: '2022', icon: '💎', type: 'challenge' }, 
           { id: 4, titleKey: 'mc.adv_goal_title', descKey: 'mc.adv_goal_desc', date: 'Now', icon: '🧪', type: 'goal' }
         ],
 
-        // 技能
         skills: [
           { name: 'Vue.js', icon: 'https://cdn.svgporn.com/logos/vue.svg', isMined: false, oreType: 'diamond' },
           { name: 'React', icon: 'https://cdn.svgporn.com/logos/react.svg', isMined: false, oreType: 'lapis' },
@@ -43,7 +42,6 @@ const fetchProfileData = () => {
           { name: 'Figma', icon: 'https://cdn.svgporn.com/logos/figma.svg', isMined: false, oreType: 'coal' },
         ],
 
-        // 照片墙
         photos: [
           { id: 1, url: 'https://picsum.photos/300/200?random=1', title: 'Workstation' },
           { id: 2, url: 'https://picsum.photos/200/200?random=2', title: 'My Cat' },
@@ -99,15 +97,21 @@ const goBack = () => router.push('/mc')
       
       <div class="left-column">
         <div class="char-wrapper" @click="handleCharClick">
-          <Transition name="fade">
+          
+          <Transition name="pop-up">
             <div class="speech-bubble" v-if="showDialog">{{ dialogText }}</div>
           </Transition>
+          
           <div class="nametag"><span class="rank">{{ t('mc.admin') }}</span> {{ profile.username }}</div>
           
           <div class="char-body">
             <img :src="profile.skinUrl" class="skin-model floating" />
-            <div class="spotlight"></div>
-            <div class="pedestal"></div>
+            <div class="holo-pedestal">
+              <div class="holo-ring"></div>
+              <div class="holo-glow"></div>
+              <!-- ✅ 新增：人物脚下灯光元素 -->
+              <div class="holo-light"></div>
+            </div>
           </div>
         </div>
 
@@ -128,18 +132,22 @@ const goBack = () => router.push('/mc')
         <div class="section-box stone-bg">
           <div class="section-header">🏆 {{ t('mc.adv_title') }}</div>
           
-          <div class="advancement-scroll-area">
-            <div class="tree-line"></div>
-            
-            <div v-for="(adv, idx) in profile.advancements" :key="idx" class="adv-node-wrapper">
-              <div class="adv-icon-box" :class="adv.type">
-                <div class="adv-icon">{{ adv.icon }}</div>
-              </div>
-              
-              <div class="adv-popup">
-                <div class="adv-title" :class="adv.type">{{ t(adv.titleKey) }}</div>
-                <div class="adv-desc">{{ t(adv.descKey) }}</div>
-                <div class="adv-date">{{ adv.date }}</div>
+          <div class="advancement-track">
+            <div 
+              v-for="(adv, idx) in profile.advancements" 
+              :key="idx" 
+              class="adv-step"
+            >
+              <div class="connector" v-if="idx > 0"></div>
+
+              <div class="mc-slot adv-slot" :class="adv.type">
+                <div class="slot-icon">{{ adv.icon }}</div>
+                
+                <div class="adv-tooltip">
+                  <div class="tt-header" :class="adv.type">{{ t(adv.titleKey) }}</div>
+                  <div class="tt-body">{{ t(adv.descKey) }}</div>
+                  <div class="tt-footer">{{ adv.date }}</div>
+                </div>
               </div>
             </div>
           </div>
@@ -187,44 +195,89 @@ const goBack = () => router.push('/mc')
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
 
-/* === 修复 1: 全局背景 (使用纯代码纹理，绝不破碎) === */
+/* === 全局 === */
 .mc-container {
-  width: 100vw; height: 100vh; 
-  overflow: hidden; /* 防止出现双重滚动条 */
+  width: 100vw; height: 100vh; overflow: hidden;
   background-color: #202020;
-  /* Deepslate 风格的噪点网格 */
+  /* Deepslate 纹理 (CSS生成) */
   background-image: 
     linear-gradient(45deg, #252525 25%, transparent 25%, transparent 75%, #252525 75%, #252525),
     linear-gradient(45deg, #252525 25%, transparent 25%, transparent 75%, #252525 75%, #252525);
   background-size: 32px 32px;
   background-position: 0 0, 16px 16px;
-  box-shadow: inset 0 0 150px rgba(0,0,0,0.8); /* 四周暗角 */
+  box-shadow: inset 0 0 150px rgba(0,0,0,0.8);
   font-family: 'VT323', monospace; color: #fff;
 }
 
-.hud-header { height: 60px; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.6); border-bottom: 2px solid #000; z-index: 50; }
+.hud-header { height: 60px; flex-shrink: 0; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.6); border-bottom: 2px solid #000; z-index: 50; }
 .mc-btn { background: #555; border: 2px solid #fff; border-bottom-color: #333; border-right-color: #333; color: #fff; padding: 6px 15px; cursor: pointer; font-family: inherit; font-size: 1.2rem; }
 
 .main-content { display: flex; height: calc(100vh - 60px); width: 100%; }
 
-/* 左侧 */
-.left-column { width: 340px; flex-shrink: 0; background: rgba(0,0,0,0.4); border-right: 4px solid #1a1a1a; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 40px; position: relative; z-index: 20; }
+/* === 左侧：角色 (居中调整) === */
+.left-column {
+  width: 340px; flex-shrink: 0; 
+  background: rgba(0,0,0,0.4); border-right: 4px solid #1a1a1a; 
+  display: flex; flex-direction: column; 
+  align-items: center; 
+  padding-top: 100px; /* 顶部留白，防止气泡顶到 Header */
+  gap: 50px;
+  position: relative; z-index: 20;
+  overflow-y: auto; scrollbar-width: none;
+}
 
 .char-wrapper { position: relative; cursor: pointer; text-align: center; }
-.spotlight { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%) rotateX(60deg); width: 140px; height: 140px; background: radial-gradient(circle, rgba(255,255,200,0.2) 0%, transparent 70%); z-index: 0; pointer-events: none; }
-.skin-model { height: 260px; image-rendering: pixelated; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.6)); position: relative; z-index: 2; }
+.char-body { position: relative; margin-top: 10px; }
+
+.skin-model { height: 260px; image-rendering: pixelated; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5)); position: relative; z-index: 2; }
 .floating { animation: float 3s ease-in-out infinite; }
 @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
 
-.speech-bubble {
-  position: absolute; top: 40px; left: 100%; margin-left: 20px;
-  background: #fff; color: #000; padding: 10px; border-radius: 4px; border: 2px solid #000;
-  width: 180px; text-align: left; z-index: 100; box-shadow: 4px 4px 0 rgba(0,0,0,0.4);
+/* 全新底座：全息投影风格 */
+.holo-pedestal {
+  position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%) perspective(300px) rotateX(60deg);
+  width: 140px; height: 140px; z-index: 1;
 }
-.speech-bubble::before { content: ''; position: absolute; top: 15px; left: -12px; border-width: 6px 12px 6px 0; border-style: solid; border-color: transparent #000 transparent transparent; }
+.holo-ring {
+  width: 100%; height: 100%; border: 4px solid rgba(0, 255, 255, 0.5); border-radius: 50%;
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+  animation: spin 10s linear infinite;
+}
+.holo-glow {
+  position: absolute; top: 20%; left: 20%; width: 60%; height: 60%;
+  background: radial-gradient(circle, rgba(0,255,255,0.4) 0%, transparent 70%);
+  filter: blur(5px);
+}
+/* ✅ 新增：人物脚下呼吸脉冲灯光样式 + 动画 */
+.holo-light {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(0, 255, 255, 0.5) 0%, rgba(0, 180, 180, 0.2) 50%, transparent 75%);
+  filter: blur(15px);
+  border-radius: 50%;
+  animation: pulse-light 3s ease-in-out infinite;
+}
+@keyframes pulse-light {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(1.4); }
+}
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-.nametag { display: inline-block; background: rgba(0,0,0,0.6); padding: 2px 8px; border: 1px solid #aaa; margin-bottom: 8px; }
-.pedestal { width: 90px; height: 25px; background: #333; border: 2px solid #111; transform: perspective(300px) rotateX(40deg) translateY(-15px); margin: 0 auto; z-index: 1; }
+/* 气泡 */
+.speech-bubble {
+  position: absolute; top: -70px; left: 50%; transform: translateX(-50%);
+  background: #fff; color: #000; padding: 10px; border-radius: 4px; border: 2px solid #000;
+  width: 200px; text-align: center; z-index: 9999;
+  box-shadow: 4px 4px 0 rgba(0,0,0,0.4);
+}
+.speech-bubble::before { content: ''; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); border-width: 10px 10px 0; border-style: solid; border-color: #000 transparent transparent; }
+.pop-up-enter-active, .pop-up-leave-active { transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+.pop-up-enter-from, .pop-up-leave-to { opacity: 0; transform: translate(-50%, 10px) scale(0.8); }
+
+.nametag { display: inline-block; background: rgba(0,0,0,0.6); padding: 2px 8px; border: 1px solid #aaa; }
 
 .stats-board { width: 260px; background: #c6c6c6; border: 2px solid #000; box-shadow: 4px 4px 0 rgba(0,0,0,0.5); }
 .board-header { background: #444; color: #fff; text-align: center; padding: 5px; font-size: 1.2rem; }
@@ -232,61 +285,73 @@ const goBack = () => router.push('/mc')
 .stat-row { display: flex; justify-content: space-between; border-bottom: 1px dashed #888; }
 .stat-value { font-weight: bold; color: #008800; }
 
-/* 右侧 */
+/* === 右侧：内容区 === */
 .right-column { 
   flex: 1; padding: 30px 40px; 
-  overflow-y: auto; /* 唯一允许滚动的区域 */
-  display: flex; flex-direction: column; gap: 30px; 
+  overflow-y: auto; 
+  display: flex; flex-direction: column; gap: 40px; 
 }
 .right-column::-webkit-scrollbar { width: 12px; background: #111; }
 .right-column::-webkit-scrollbar-thumb { background: #666; border: 2px solid #111; }
 
-/* === 修复 2: 统一的深色板块背景 (替代 broken image) === */
 .section-box { 
   background-color: rgba(30,30,30,0.8);
   border: 4px solid #111; padding: 25px; position: relative; border-radius: 4px; 
   box-shadow: inset 0 0 30px rgba(0,0,0,0.5);
 }
-.stone-bg, .cobble-bg, .wood-bg { /* 统一用深色，微调透明度即可 */
-  background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.02) 0, rgba(255,255,255,0.02) 10px, transparent 10px, transparent 20px);
+.stone-bg { background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.02) 0, rgba(255,255,255,0.02) 10px, transparent 10px, transparent 20px); }
+.section-header { font-size: 1.8rem; color: #eee; margin-bottom: 15px; text-shadow: 2px 2px 0 #000; display: inline-block; border-bottom: 3px solid #555; }
+
+/* --- 核心修复：成就树 (标准 MC 风格) --- */
+.advancement-track {
+  display: flex; align-items: center; 
+  /* 留足顶部空间给 Tooltip */
+  padding: 80px 20px 20px 20px; 
+  overflow-x: auto; 
 }
 
-.section-header { font-size: 1.8rem; color: #eee; margin-bottom: 10px; text-shadow: 2px 2px 0 #000; display: inline-block; border-bottom: 3px solid #555; }
+.adv-step { display: flex; align-items: center; position: relative; }
 
-/* === 修复 3: 成就树气泡遮挡问题 === */
-.advancement-scroll-area { 
-  display: flex; align-items: center; gap: 60px; 
-  /* 关键修复：增加顶部 Padding，给气泡留出弹出空间 */
-  padding: 100px 20px 40px 20px; 
-  margin-top: -60px; /* 视觉拉回，保持美观 */
-  overflow-x: auto; min-height: 150px; 
-}
-.tree-line { position: absolute; top: 60%; left: 0; width: 100%; height: 4px; background: #000; z-index: 0; }
-.adv-node-wrapper { position: relative; width: 64px; height: 64px; flex-shrink: 0; z-index: 1; display: flex; align-items: center; justify-content: center; }
+/* 连接线 */
+.connector { width: 60px; height: 6px; background: #333; border: 2px solid #000; border-left: none; border-right: none; }
 
-.adv-icon-box { 
-  width: 60px; height: 60px; background: #333; border: 2px solid #777; 
+/* 物品槽节点 */
+.mc-slot {
+  width: 64px; height: 64px; background: #8b8b8b;
+  border: 4px solid #fff; border-right-color: #373737; border-bottom-color: #373737; border-left-color: #fff; border-top-color: #fff;
   display: flex; align-items: center; justify-content: center;
-  transition: transform 0.2s; cursor: help; 
+  position: relative; cursor: help;
+  transition: transform 0.1s;
 }
-.adv-icon-box.challenge { transform: rotate(45deg); border-color: #a0a; }
-.adv-icon-box.challenge .adv-icon { transform: rotate(-45deg); } 
-
-.adv-node-wrapper:hover .adv-icon-box { background: #555; transform: scale(1.1); }
-.adv-node-wrapper:hover .adv-icon-box.challenge { transform: rotate(45deg) scale(1.1); }
-.adv-icon { font-size: 30px; filter: drop-shadow(2px 2px 0 #000); }
-
-/* Tooltip (向上弹出) */
-.adv-popup {
-  position: absolute; bottom: 85px; left: 50%; transform: translateX(-50%);
-  width: 220px; background: #100010; border: 2px solid #50f; padding: 8px;
-  opacity: 0; pointer-events: none; transition: opacity 0.2s; text-align: center; 
-  z-index: 999; box-shadow: 0 5px 15px rgba(0,0,0,0.8);
+/* ✅ 修复弹窗遮挡：提升hover层级到9999，绝对置顶 */
+.mc-slot:hover {
+  background: #c6c6c6;
+  z-index: 9999;
+  transform: scale(1.1);
 }
-.adv-node-wrapper:hover .adv-popup { opacity: 1; }
-.adv-title { color: #ff5; margin-bottom: 4px; font-weight: bold; }
-.adv-desc { font-size: 0.9rem; color: #ccc; }
-.adv-date { font-size: 0.8rem; color: #888; margin-top: 5px; }
+
+/* 特殊边框 */
+.mc-slot.challenge { border-color: #a0a; border-right-color: #303; border-bottom-color: #303; } /* 紫色 */
+.mc-slot.goal { border-radius: 50%; border-color: gold; border-right-color: #b8860b; border-bottom-color: #b8860b; } /* 金色圆 */
+
+.slot-icon { font-size: 32px; filter: drop-shadow(2px 2px 0 rgba(0,0,0,0.5)); }
+
+/* Tooltip (经典 MC 风格) - ✅ 修复遮挡：层级拉满9999 */
+.adv-tooltip {
+  position: absolute; bottom: 120%; left: 50%; transform: translateX(-50%);
+  min-width: 180px; background: rgba(16,0,16,0.95); 
+  border: 3px solid #30f; padding: 6px;
+  color: #fff; z-index: 9999;
+  opacity: 0; pointer-events: none; transition: opacity 0.2s;
+  text-align: left;
+  box-shadow: 4px 4px 10px rgba(0,0,0,0.5);
+}
+.mc-slot:hover .adv-tooltip { opacity: 1; }
+
+.tt-header { color: #ffff55; font-weight: bold; margin-bottom: 4px; text-shadow: 2px 2px 0 #000; }
+.tt-header.challenge { color: #ff55ff; } /* 挑战是紫色标题 */
+.tt-body { color: #aaaaaa; font-size: 0.9rem; margin-bottom: 4px; }
+.tt-footer { color: #555555; font-size: 0.8rem; font-style: italic; }
 
 /* 矿石 */
 .ore-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 15px; }
