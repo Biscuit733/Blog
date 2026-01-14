@@ -1,18 +1,13 @@
 import { createI18n } from 'vue-i18n'
-// 引入拆分出来的模块
 import mc from './modules/mc'
-
-// 如果你以后有 vue-bits，就 import vueBits from './modules/vueBits'
+// import vueBits from './modules/vueBits' // 以后你可以这样加别的模块
 
 const messages = {
   en: {
-    // 使用命名空间 'mc'，这样调用时就是 t('mc.back')
-    mc: mc.en,
-    // vueBits: vueBits.en
+    mc: mc.en
   },
   zh: {
-    mc: mc.zh,
-    // vueBits: vueBits.zh
+    mc: mc.zh
   }
 }
 

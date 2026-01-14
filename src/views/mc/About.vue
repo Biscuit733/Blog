@@ -9,16 +9,12 @@ const isLoading = ref(true)
 const showDialog = ref(false)
 const dialogText = ref('')
 
-// --- 模拟数据 ---
 const fetchProfileData = () => {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve({
         username: 'biscuit',
         skinUrl: 'https://minotar.net/armor/body/conedox/100.png', 
-        wechat: 'YaNtAngoo',
-        level: 25,
-        xp: 85,
         
         // 统计
         stats: [
@@ -28,7 +24,7 @@ const fetchProfileData = () => {
           { labelKey: 'mc.stat_project', value: '42', icon: '📦' }
         ],
 
-        // 成就 (注意：这里只存 Key)
+        // 成就
         advancements: [
           { id: 1, titleKey: 'mc.adv_edu_title', descKey: 'mc.adv_edu_desc', date: '2019', icon: '🌱', type: 'normal' },
           { id: 2, titleKey: 'mc.adv_job1_title', descKey: 'mc.adv_job1_desc', date: '2020', icon: '⛏️', type: 'normal' },
@@ -51,7 +47,7 @@ const fetchProfileData = () => {
         photos: [
           { id: 1, url: 'https://picsum.photos/300/200?random=1', title: 'Workstation' },
           { id: 2, url: 'https://picsum.photos/200/200?random=2', title: 'My Cat' },
-          { id: 3, url: 'https://picsum.photos/300/200?random=3', title: 'Travel' },
+          { id: 3, url: 'https://picsum.photos/300/200?random=3', title: 'Trip to JP' },
           { id: 4, url: 'https://picsum.photos/200/300?random=4', title: 'Coffee' }
         ]
       })
@@ -66,9 +62,7 @@ onMounted(async () => {
   isLoading.value = false
 })
 
-// --- 交互逻辑 ---
 const handleCharClick = () => {
-  // 获取翻译后的数组
   const quotes = tm('mc.npc_quotes') 
   const randomQuote = quotes[Math.floor(Math.random() * quotes.length)]
   dialogText.value = randomQuote
@@ -79,25 +73,20 @@ const handleCharClick = () => {
 const mineBlock = (index) => {
   const skill = profile.value.skills[index]
   if (skill.isMined) return
-
-  // 触发重绘播放动画
   const el = document.getElementById(`ore-${index}`)
   if(el) {
     el.classList.remove('shake-anim')
     void el.offsetWidth 
     el.classList.add('shake-anim')
   }
-  
-  setTimeout(() => {
-    skill.isMined = true
-  }, 300)
+  setTimeout(() => { skill.isMined = true }, 300)
 }
 
 const goBack = () => router.push('/mc')
 </script>
 
 <template>
-  <div class="deepslate-container">
+  <div class="mc-container">
     
     <div class="hud-header">
       <button class="mc-btn back-btn" @click="goBack">&lt; {{ t('mc.back') }}</button>
@@ -114,8 +103,12 @@ const goBack = () => router.push('/mc')
             <div class="speech-bubble" v-if="showDialog">{{ dialogText }}</div>
           </Transition>
           <div class="nametag"><span class="rank">{{ t('mc.admin') }}</span> {{ profile.username }}</div>
-          <img :src="profile.skinUrl" class="skin-model floating" />
-          <div class="pedestal"></div>
+          
+          <div class="char-body">
+            <img :src="profile.skinUrl" class="skin-model floating" />
+            <div class="spotlight"></div>
+            <div class="pedestal"></div>
+          </div>
         </div>
 
         <div class="stats-board">
@@ -134,14 +127,11 @@ const goBack = () => router.push('/mc')
         
         <div class="section-box stone-bg">
           <div class="section-header">🏆 {{ t('mc.adv_title') }}</div>
+          
           <div class="advancement-scroll-area">
             <div class="tree-line"></div>
             
-            <div 
-              v-for="(adv, idx) in profile.advancements" 
-              :key="idx" 
-              class="adv-node-wrapper"
-            >
+            <div v-for="(adv, idx) in profile.advancements" :key="idx" class="adv-node-wrapper">
               <div class="adv-icon-box" :class="adv.type">
                 <div class="adv-icon">{{ adv.icon }}</div>
               </div>
@@ -190,79 +180,113 @@ const goBack = () => router.push('/mc')
       </div>
     </div>
     
-    <div v-if="isLoading" class="loading">Generating Terrain...</div>
+    <div v-if="isLoading" class="loading">{{ t('mc.loading') }}</div>
   </div>
 </template>
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
 
-.deepslate-container {
-  width: 100vw; height: 100vh; overflow: hidden;
-  background-color: #2f2f2f;
-  background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjMmYyZjJmIi8+CjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiMzMzMiLz4KPC9zdmc+');
+/* === 修复 1: 全局背景 (使用纯代码纹理，绝不破碎) === */
+.mc-container {
+  width: 100vw; height: 100vh; 
+  overflow: hidden; /* 防止出现双重滚动条 */
+  background-color: #202020;
+  /* Deepslate 风格的噪点网格 */
+  background-image: 
+    linear-gradient(45deg, #252525 25%, transparent 25%, transparent 75%, #252525 75%, #252525),
+    linear-gradient(45deg, #252525 25%, transparent 25%, transparent 75%, #252525 75%, #252525);
+  background-size: 32px 32px;
+  background-position: 0 0, 16px 16px;
+  box-shadow: inset 0 0 150px rgba(0,0,0,0.8); /* 四周暗角 */
   font-family: 'VT323', monospace; color: #fff;
-  display: flex; flex-direction: column;
 }
 
-.hud-header { height: 60px; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.5); border-bottom: 2px solid #111; z-index: 50; }
-.mc-btn { background: #555; border: 2px solid #fff; border-bottom-color: #333; border-right-color: #333; color: #fff; padding: 5px 12px; cursor: pointer; font-family: inherit; font-size: 1.2rem; }
+.hud-header { height: 60px; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.6); border-bottom: 2px solid #000; z-index: 50; }
+.mc-btn { background: #555; border: 2px solid #fff; border-bottom-color: #333; border-right-color: #333; color: #fff; padding: 6px 15px; cursor: pointer; font-family: inherit; font-size: 1.2rem; }
 
-.main-content { display: flex; height: calc(100vh - 60px); }
+.main-content { display: flex; height: calc(100vh - 60px); width: 100%; }
 
 /* 左侧 */
-.left-column { width: 320px; flex-shrink: 0; background: rgba(0,0,0,0.3); border-right: 4px solid #1a1a1a; display: flex; flex-direction: column; align-items: center; padding-top: 30px; gap: 20px; }
-.char-wrapper { position: relative; cursor: pointer; }
-.skin-model { height: 260px; image-rendering: pixelated; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.6)); }
+.left-column { width: 340px; flex-shrink: 0; background: rgba(0,0,0,0.4); border-right: 4px solid #1a1a1a; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 40px; position: relative; z-index: 20; }
+
+.char-wrapper { position: relative; cursor: pointer; text-align: center; }
+.spotlight { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%) rotateX(60deg); width: 140px; height: 140px; background: radial-gradient(circle, rgba(255,255,200,0.2) 0%, transparent 70%); z-index: 0; pointer-events: none; }
+.skin-model { height: 260px; image-rendering: pixelated; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.6)); position: relative; z-index: 2; }
 .floating { animation: float 3s ease-in-out infinite; }
 @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-.nametag { text-align: center; background: rgba(0,0,0,0.6); padding: 2px 8px; border: 1px solid #aaa; margin-bottom: 8px; }
-.pedestal { width: 100px; height: 30px; background: #333; border: 2px solid #111; transform: perspective(300px) rotateX(40deg) translateY(-15px); margin: 0 auto; }
-.speech-bubble { position: absolute; top: -50px; left: 50%; transform: translateX(-50%); background: #fff; color: #000; padding: 8px; border-radius: 4px; border: 2px solid #000; width: 180px; text-align: center; z-index: 20; box-shadow: 4px 4px 0 rgba(0,0,0,0.4); }
 
-.stats-board { width: 280px; background: #c6c6c6; border: 2px solid #000; box-shadow: 4px 4px 0 rgba(0,0,0,0.5); }
-.board-header { background: #444; color: #fff; text-align: center; padding: 4px; font-size: 1.2rem; }
+.speech-bubble {
+  position: absolute; top: 40px; left: 100%; margin-left: 20px;
+  background: #fff; color: #000; padding: 10px; border-radius: 4px; border: 2px solid #000;
+  width: 180px; text-align: left; z-index: 100; box-shadow: 4px 4px 0 rgba(0,0,0,0.4);
+}
+.speech-bubble::before { content: ''; position: absolute; top: 15px; left: -12px; border-width: 6px 12px 6px 0; border-style: solid; border-color: transparent #000 transparent transparent; }
+
+.nametag { display: inline-block; background: rgba(0,0,0,0.6); padding: 2px 8px; border: 1px solid #aaa; margin-bottom: 8px; }
+.pedestal { width: 90px; height: 25px; background: #333; border: 2px solid #111; transform: perspective(300px) rotateX(40deg) translateY(-15px); margin: 0 auto; z-index: 1; }
+
+.stats-board { width: 260px; background: #c6c6c6; border: 2px solid #000; box-shadow: 4px 4px 0 rgba(0,0,0,0.5); }
+.board-header { background: #444; color: #fff; text-align: center; padding: 5px; font-size: 1.2rem; }
 .stats-list { padding: 10px; display: flex; flex-direction: column; gap: 5px; color: #333; }
-.stat-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #999; }
+.stat-row { display: flex; justify-content: space-between; border-bottom: 1px dashed #888; }
 .stat-value { font-weight: bold; color: #008800; }
 
 /* 右侧 */
-.right-column { flex: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; gap: 30px; }
+.right-column { 
+  flex: 1; padding: 30px 40px; 
+  overflow-y: auto; /* 唯一允许滚动的区域 */
+  display: flex; flex-direction: column; gap: 30px; 
+}
 .right-column::-webkit-scrollbar { width: 12px; background: #111; }
 .right-column::-webkit-scrollbar-thumb { background: #666; border: 2px solid #111; }
-.section-box { background: rgba(0,0,0,0.4); border: 4px solid #111; padding: 20px; position: relative; border-radius: 4px; }
-.section-header { font-size: 1.8rem; color: #eee; margin-bottom: 20px; text-shadow: 2px 2px 0 #000; display: inline-block; border-bottom: 3px solid #555; }
 
-/* --- 修复成就树 --- */
-.advancement-scroll-area { display: flex; align-items: center; gap: 60px; padding: 30px 10px; overflow-x: auto; position: relative; }
-.tree-line { position: absolute; top: 50%; left: 0; width: 100%; height: 4px; background: #000; z-index: 0; }
-.adv-node-wrapper { position: relative; width: 64px; height: 64px; flex-shrink: 0; z-index: 1; }
+/* === 修复 2: 统一的深色板块背景 (替代 broken image) === */
+.section-box { 
+  background-color: rgba(30,30,30,0.8);
+  border: 4px solid #111; padding: 25px; position: relative; border-radius: 4px; 
+  box-shadow: inset 0 0 30px rgba(0,0,0,0.5);
+}
+.stone-bg, .cobble-bg, .wood-bg { /* 统一用深色，微调透明度即可 */
+  background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.02) 0, rgba(255,255,255,0.02) 10px, transparent 10px, transparent 20px);
+}
+
+.section-header { font-size: 1.8rem; color: #eee; margin-bottom: 10px; text-shadow: 2px 2px 0 #000; display: inline-block; border-bottom: 3px solid #555; }
+
+/* === 修复 3: 成就树气泡遮挡问题 === */
+.advancement-scroll-area { 
+  display: flex; align-items: center; gap: 60px; 
+  /* 关键修复：增加顶部 Padding，给气泡留出弹出空间 */
+  padding: 100px 20px 40px 20px; 
+  margin-top: -60px; /* 视觉拉回，保持美观 */
+  overflow-x: auto; min-height: 150px; 
+}
+.tree-line { position: absolute; top: 60%; left: 0; width: 100%; height: 4px; background: #000; z-index: 0; }
+.adv-node-wrapper { position: relative; width: 64px; height: 64px; flex-shrink: 0; z-index: 1; display: flex; align-items: center; justify-content: center; }
 
 .adv-icon-box { 
-  width: 100%; height: 100%; background: #333; border: 2px solid #777; 
-  display: flex; align-items: center; justify-content: center; 
+  width: 60px; height: 60px; background: #333; border: 2px solid #777; 
+  display: flex; align-items: center; justify-content: center;
   transition: transform 0.2s; cursor: help; 
 }
-/* 旋转只应用在 icon-box 上 */
 .adv-icon-box.challenge { transform: rotate(45deg); border-color: #a0a; }
-.adv-icon-box.challenge .adv-icon { transform: rotate(-45deg); } /* 抵消图标旋转 */
+.adv-icon-box.challenge .adv-icon { transform: rotate(-45deg); } 
 
 .adv-node-wrapper:hover .adv-icon-box { background: #555; transform: scale(1.1); }
 .adv-node-wrapper:hover .adv-icon-box.challenge { transform: rotate(45deg) scale(1.1); }
 .adv-icon { font-size: 30px; filter: drop-shadow(2px 2px 0 #000); }
 
-/* Tooltip 独立出来，不再受旋转影响 */
+/* Tooltip (向上弹出) */
 .adv-popup {
-  position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%);
-  width: 200px; background: #100010; border: 2px solid #50f; padding: 8px;
-  opacity: 0; pointer-events: none; transition: opacity 0.2s; text-align: center; z-index: 100;
-  box-shadow: 0 5px 10px rgba(0,0,0,0.5); color: #fff;
+  position: absolute; bottom: 85px; left: 50%; transform: translateX(-50%);
+  width: 220px; background: #100010; border: 2px solid #50f; padding: 8px;
+  opacity: 0; pointer-events: none; transition: opacity 0.2s; text-align: center; 
+  z-index: 999; box-shadow: 0 5px 15px rgba(0,0,0,0.8);
 }
 .adv-node-wrapper:hover .adv-popup { opacity: 1; }
-.adv-title { color: #ff5; margin-bottom: 4px; }
-.adv-title.challenge { color: #a0a; }
-.adv-desc { font-size: 0.9rem; color: #aaa; }
-.adv-date { font-size: 0.8rem; color: #555; margin-top: 5px; }
+.adv-title { color: #ff5; margin-bottom: 4px; font-weight: bold; }
+.adv-desc { font-size: 0.9rem; color: #ccc; }
+.adv-date { font-size: 0.8rem; color: #888; margin-top: 5px; }
 
 /* 矿石 */
 .ore-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 15px; }

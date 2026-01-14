@@ -25,7 +25,9 @@ jobs:
           # cache: 'npm'
 
       - name: Install dependencies 📦
-        run: npm install
+        run: |
+          rm package-lock.json
+          npm install
 
       - name: Build 🔧
         run: npm run build # 这里会生成 dist 文件夹
