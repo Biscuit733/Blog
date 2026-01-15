@@ -4,6 +4,7 @@ const McProjects = () => import('../views/mc/Projects.vue') // 📦 懒加载引
 // 懒加载引入（更高效）
 const Gateway = () => import('../views/Gateway.vue')
 const McHome = () => import('../views/mc/Home.vue')
+const McMessages = () => import('../views/mc/Messages.vue')
 const TechHome = () => import('../views/tech/Home.vue')
 
 const router = createRouter({
@@ -44,6 +45,12 @@ const router = createRouter({
       path: '/mc/articles/:id', // 动态参数 :id
       name: 'mc-article-detail',
       component: () => import('../views/mc/ArticleDetail.vue'),
+      meta: { theme: 'pixel' }
+    },
+    {
+      path: '/mc/messages',
+      name: 'mc-messages',
+      component: McMessages,
       meta: { theme: 'pixel' }
     },
     {

@@ -4,6 +4,7 @@ import mcArticles from './modules/mc_articles'
 import mcProjects from './modules/mc_projects' // ✨ 1. 引入新模块
 import mcAbout from './modules/mc_about' // ✨ 1. 引入新模块
 import mcBook from './modules/mc_book' // ✨ 1. 引入新模块
+import mcMessages from './modules/mc_message' // ✨ 1. 引入新模块
 import tech from './modules/tech' 
 
 const messages = {
@@ -13,7 +14,8 @@ const messages = {
       articles: mcArticles.en,
       projects: mcProjects.en, // ✨ 2. 挂载到 mc.projects
       about: mcAbout.en, // 挂载到 mc.about
-      book: mcBook.en // 挂载到 mc.book
+      book: mcBook.en, // 挂载到 mc.book
+      messages: mcMessages.en // 挂载到 mc.messages
     },
     tech: { ...tech.en }
   },
@@ -23,7 +25,8 @@ const messages = {
       articles: mcArticles.zh,
       projects: mcProjects.zh, // ✨ 2. 挂载到 mc.projects
       about: mcAbout.zh, // 挂载到 mc.about
-      book: mcBook.zh // 挂载到 mc.book
+      book: mcBook.zh, // 挂载到 mc.book
+      messages: mcMessages.zh // 挂载到 mc.messages
     },
     tech: { ...tech.zh }
   }

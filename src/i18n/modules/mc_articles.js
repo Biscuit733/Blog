@@ -34,6 +34,18 @@ export default {
     btn_recreate: "Re-Create",
     btn_cancel: "Cancel",
     
+    // ✨ 弹窗相关
+    delete_title: "Are you sure you want to delete this world?",
+    delete_warn: "'{name}' will be lost forever! (A long time!)",
+    btn_confirm_delete: "Delete",
+    
+    edit_title: "Rename World",
+    label_world_name: "World Name",
+    btn_save: "Save World",
+    
+    loading_terrain: "Building Terrain...",
+    loading_chunks: "Loading Chunks...",
+    
     search_placeholder: "Search saves...",
     conversion_text: "World conversion required"
   },
@@ -56,16 +68,14 @@ export default {
       next: '下一页',
       page: '页码'
     },
-    title: "选择世界", // 对应 Singleplayer 标题
+    title: "选择世界", // 简体
     
-    // 存档信息
     mode_survival: "生存模式",
     mode_creative: "创造模式",
     mode_hardcore: "极限模式",
     cheats: "允许作弊",
     version: "版本 1.20.1",
     
-    // 底部按钮 (经典布局)
     btn_play: "进入选中的世界",
     btn_create: "创建新的世界",
     btn_edit: "编辑",
@@ -73,7 +83,18 @@ export default {
     btn_recreate: "重建",
     btn_cancel: "取消",
     
-    // 搜索/提示
+    // ✨ 弹窗相关（简体）
+    delete_title: "你确定要删除这个世界吗？",
+    delete_warn: "“{name}” 将会永远丢失！（很久很久！）",
+    btn_confirm_delete: "删除",
+    
+    edit_title: "重命名世界",
+    label_world_name: "世界名称",
+    btn_save: "保存",
+    
+    loading_terrain: "正在生成地形...",
+    loading_chunks: "加载区块中...",
+    
     search_placeholder: "搜索存档...",
     conversion_text: "必须转换世界才可读取 (点击进入)"
   }

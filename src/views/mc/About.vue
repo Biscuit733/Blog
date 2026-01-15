@@ -12,7 +12,7 @@ const dialogText = ref('')
 
 // 定义音效
 const baseUrl = import.meta.env.BASE_URL || '/'
-const sfxClick = new Audio(baseUrl + 'sounds/click.ogg')
+const sfxClick = new Audio(baseUrl + 'sounds/click.mp3')
 const sfxPop = new Audio(baseUrl + 'sounds/pop.ogg')
 
 const playClick = () => {
