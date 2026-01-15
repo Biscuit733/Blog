@@ -18,7 +18,24 @@ export default {
       prev: 'Prev',
       next: 'Next',
       page: 'Page'
-    }
+    },
+    title: "Select World",
+    
+    mode_survival: "Survival Mode",
+    mode_creative: "Creative Mode",
+    mode_hardcore: "Hardcore Mode",
+    cheats: "Cheats",
+    version: "Version 1.20.1",
+    
+    btn_play: "Play Selected World",
+    btn_create: "Create New World",
+    btn_edit: "Edit",
+    btn_delete: "Delete",
+    btn_recreate: "Re-Create",
+    btn_cancel: "Cancel",
+    
+    search_placeholder: "Search saves...",
+    conversion_text: "World conversion required"
   },
   zh: {
     title: '皇家图书馆',
@@ -38,6 +55,26 @@ export default {
       prev: '上一页',
       next: '下一页',
       page: '页码'
-    }
+    },
+    title: "选择世界", // 对应 Singleplayer 标题
+    
+    // 存档信息
+    mode_survival: "生存模式",
+    mode_creative: "创造模式",
+    mode_hardcore: "极限模式",
+    cheats: "允许作弊",
+    version: "版本 1.20.1",
+    
+    // 底部按钮 (经典布局)
+    btn_play: "进入选中的世界",
+    btn_create: "创建新的世界",
+    btn_edit: "编辑",
+    btn_delete: "删除",
+    btn_recreate: "重建",
+    btn_cancel: "取消",
+    
+    // 搜索/提示
+    search_placeholder: "搜索存档...",
+    conversion_text: "必须转换世界才可读取 (点击进入)"
   }
 }

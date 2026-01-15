@@ -1,6 +1,6 @@
 // src/router/index.js
 import { createRouter, createWebHistory } from 'vue-router'
-
+const McProjects = () => import('../views/mc/Projects.vue') // 📦 懒加载引入
 // 懒加载引入（更高效）
 const Gateway = () => import('../views/Gateway.vue')
 const McHome = () => import('../views/mc/Home.vue')
@@ -25,6 +25,13 @@ const router = createRouter({
       path: '/mc/about',
       name: 'mc-about',
       component: () => import('../views/mc/About.vue'),
+      meta: { theme: 'pixel' }
+    },
+    // ✨✨✨ 新增路由开始 ✨✨✨
+    {
+      path: '/mc/projects',
+      name: 'mc-projects',
+      component: McProjects,
       meta: { theme: 'pixel' }
     },
     {

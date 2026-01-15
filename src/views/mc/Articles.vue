@@ -1,282 +1,242 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 
 const router = useRouter()
 const { t } = useI18n()
 const isLoading = ref(true)
-const searchQuery = ref('')
-const activeFilter = ref('all')
+const baseUrl = import.meta.env.BASE_URL || '/'
 
-// 模拟文章数据
-const allArticles = [
-  { id: 1, title: 'Vue 3 Reactivity Secrets', date: '2025-10-24', category: 'tech', readTime: '10 min', difficulty: 'IV', icon: '📘' },
-  { id: 2, title: 'My Trip to The End', date: '2025-10-20', category: 'life', readTime: '5 min', difficulty: 'I', icon: '📜' },
-  { id: 3, title: 'Building a Redstone CPU', date: '2025-09-15', category: 'tech', readTime: '25 min', difficulty: 'V', icon: '⚡' },
-  { id: 4, title: 'Shader Configuration Guide', date: '2025-09-10', category: 'tech', readTime: '15 min', difficulty: 'III', icon: '🔮' },
-  { id: 5, title: 'Coffee Brewing Recipes', date: '2025-08-05', category: 'life', readTime: '3 min', difficulty: 'I', icon: '☕' },
-  { id: 6, title: 'Docker for Villagers', date: '2025-07-20', category: 'tech', readTime: '12 min', difficulty: 'II', icon: '🐳' },
-]
+// 模拟文章数据 (模拟存档数据)
+const articles = ref([
+  {
+    id: 1,
+    title: 'Vue 3.0 深度解析', // 世界名
+    fileName: 'Vue_Deep_Dive', // 文件夹名
+    date: '2026-01-14',
+    modeKey: 'mode_survival', // 对应生存模式
+    cheats: true,
+    icon: baseUrl + '/images/homeBG.png', // 模拟世界快照
+    version: '1.20.1'
+  },
+  {
+    id: 2,
+    title: 'CSS 像素画绘制指南',
+    fileName: 'Pixel_Art_Tutorial',
+    date: '2026-01-10',
+    modeKey: 'mode_creative', // 对应创造模式
+    cheats: false,
+    icon: baseUrl + '/images/aboutBG.png',
+    version: '1.19.4'
+  },
+  {
+    id: 3,
+    title: 'Spigot 服务器搭建',
+    fileName: 'Server_Log_Backup',
+    date: '2025-12-25',
+    modeKey: 'mode_hardcore', // 对应极限模式
+    cheats: false,
+    icon: null, // 无图
+    version: '1.7.10'
+  }
+])
 
-const articles = ref([])
-const openArticle = (id) => {
-  // 跳转到 /mc/articles/:id
-  router.push({ 
-    name: 'mc-article-detail', 
-    params: { id } 
-  })
-}
+const selectedId = ref(null)
+
 onMounted(() => {
-  // 模拟加载延迟
-  setTimeout(() => {
-    articles.value = allArticles
-    isLoading.value = false
-  }, 600)
-  // 播放翻书/附魔音效
-  const baseUrl = import.meta.env.BASE_URL || '/'
-  const bookSound = new Audio(baseUrl + 'sounds/book_open.ogg')
-  bookSound.volume = 0.8
-  bookSound.play()
+  // 模拟读取硬盘存档
+  setTimeout(() => { isLoading.value = false }, 500)
 })
 
-// 筛选逻辑
-const filteredArticles = computed(() => {
-  return articles.value.filter(item => {
-    // 1. 搜索过滤
-    const matchSearch = item.title.toLowerCase().includes(searchQuery.value.toLowerCase())
-    // 2. 分类过滤
-    const matchType = activeFilter.value === 'all' || item.category === activeFilter.value
-    return matchSearch && matchType
-  })
-})
+const selectWorld = (id) => {
+  selectedId.value = id
+  new Audio(baseUrl + 'sounds/click.ogg').play().catch(()=>{})
+}
 
-const goBack = () => router.push('/mc')
+const playWorld = () => {
+  if (!selectedId.value) return
+  new Audio(baseUrl + 'sounds/click.ogg').play().catch(()=>{})
+  // 跳转详情页
+  router.push(`/mc/articles/${selectedId.value}`)
+}
+
+const goBack = () => {
+  new Audio(baseUrl + 'sounds/click.ogg').play().catch(()=>{})
+  router.push('/mc')
+}
+
+// 格式化副标题: "文件夹名 (日期)"
+const getSubText = (article) => {
+  return `${article.fileName} (${article.date})`
+}
+
+// 格式化第三行: "模式, 版本"
+const getModeText = (article) => {
+  let text = t(`mc.articles.${article.modeKey}`)
+  if (article.cheats) text += `, ${t('mc.articles.cheats')}`
+  return text
+}
 </script>
 
 <template>
-  <div class="library-container">
-    <div class="library-bg"></div>
+  <div class="mc-singleplayer-page">
+    <div class="bg-overlay"></div>
 
-    <div class="hud-header">
-      <button class="mc-btn back-btn" @click="goBack">&lt; {{ t('mc.back') }}</button>
-      <div class="hud-title">
-        <h1>{{ t('mc.articles.title') }}</h1>
-        <span class="subtitle">{{ t('mc.articles.subtitle') }}</span>
-      </div>
-      <div class="hud-spacer"></div> </div>
+    <div class="header-bar">
+      <h1 class="page-title">{{ t('mc.articles.title') }}</h1>
+    </div>
 
-    <div class="main-content" v-if="!isLoading">
-      
-      <div class="control-bar">
-        <div class="search-box">
-          <span class="search-icon">🔍</span>
-          <input 
-            v-model="searchQuery" 
-            type="text" 
-            :placeholder="t('mc.articles.search_placeholder')" 
-            class="mc-input"
-          />
-        </div>
+    <div class="list-container">
+      <div class="world-list-wrapper">
         
-        <div class="filter-tabs">
-          <button 
-            class="tab-btn" 
-            :class="{ active: activeFilter === 'all' }"
-            @click="activeFilter = 'all'"
-          >{{ t('mc.articles.filter_all') }}</button>
-          
-          <button 
-            class="tab-btn" 
-            :class="{ active: activeFilter === 'tech' }"
-            @click="activeFilter = 'tech'"
-          >{{ t('mc.articles.filter_tech') }}</button>
-          
-          <button 
-            class="tab-btn" 
-            :class="{ active: activeFilter === 'life' }"
-            @click="activeFilter = 'life'"
-          >{{ t('mc.articles.filter_life') }}</button>
+        <div v-if="isLoading" class="loading-text">
+          {{ t('mc.loading') }}
         </div>
-      </div>
 
-      <div class="bookshelf-area">
-        <div 
-          v-for="article in filteredArticles" 
-          :key="article.id" 
-          class="book-card"
-          :class="article.category"
-        >
-          <div class="book-cover">
-            <span class="book-icon">{{ article.icon }}</span>
-            <div v-if="article.category === 'tech'" class="enchant-glint"></div>
-          </div>
-
-          <div class="book-info">
-            <h3 class="book-title">{{ article.title }}</h3>
-            
-            <div class="book-meta">
-              <div class="meta-row">
-                <span class="label">{{ t('mc.articles.attr_date') }}:</span>
-                <span class="value">{{ article.date }}</span>
-              </div>
-              <div class="meta-row">
-                <span class="label">{{ t('mc.articles.attr_read') }}:</span>
-                <span class="value">{{ article.readTime }}</span>
-              </div>
-              <div class="meta-row">
-                <span class="label">{{ t('mc.articles.difficulty') }}:</span>
-                <span class="value enchant-text">{{ article.difficulty }}</span>
+        <template v-else>
+          <div 
+            v-for="world in articles" 
+            :key="world.id"
+            class="world-entry"
+            :class="{ 'selected': selectedId === world.id }"
+            @click="selectWorld(world.id)"
+            @dblclick="playWorld"
+          >
+            <div class="world-icon">
+              <img v-if="world.icon" :src="world.icon" class="icon-img" />
+              <div v-else class="icon-placeholder">
+                <span>World</span>
               </div>
             </div>
 
-            <button class="read-btn" @click.stop="openArticle(article.id)">{{ t('mc.articles.read_more') }}</button>
+            <div class="world-info">
+              <div class="world-name">{{ world.title }}</div>
+              
+              <div class="world-meta">{{ getSubText(world) }}</div>
+              
+              <div class="world-mode">
+                {{ getModeText(world) }} - {{ world.version }}
+              </div>
+            </div>
           </div>
-        </div>
-        
-        <div v-if="filteredArticles.length === 0" class="empty-state">
-          No scrolls found... 🕸️
-        </div>
+          
+          <div class="world-entry empty" v-for="n in 3" :key="'empty'+n"></div>
+        </template>
       </div>
-
     </div>
 
-    <div v-if="isLoading" class="loading">{{ t('mc.loading') }}</div>
+    <div class="footer-bar">
+      <div class="btn-row top-row">
+        <button class="mc-btn lg" :disabled="!selectedId" @click="playWorld">
+          {{ t('mc.articles.btn_play') }}
+        </button>
+        <button class="mc-btn lg" disabled>
+          {{ t('mc.articles.btn_create') }}
+        </button>
+      </div>
+      
+      <div class="btn-row bottom-row">
+        <button class="mc-btn">{{ t('mc.articles.btn_edit') }}</button>
+        <button class="mc-btn">{{ t('mc.articles.btn_delete') }}</button>
+        <button class="mc-btn">{{ t('mc.articles.btn_recreate') }}</button>
+        <button class="mc-btn" @click="goBack">{{ t('mc.articles.btn_cancel') }}</button>
+      </div>
+    </div>
+
   </div>
 </template>
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
 
-/* === 全局容器 === */
-.library-container {
-  width: 100vw; height: 100vh; overflow: hidden;
+.mc-singleplayer-page {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  overflow: hidden;
+  background-image: url('/images/homeBG.png'); 
+  background-size: cover; background-position: center;
   font-family: 'VT323', monospace; color: #fff;
   display: flex; flex-direction: column;
 }
 
-/* 背景层 (等你有了图，把 url 换成你的 library-bg.jpg) */
-.library-bg {
-  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-  /* 临时使用 CSS 渐变模拟书架氛围 */
-  /* background: radial-gradient(circle at 50% 50%, #2a1505 0%, #000 90%); */
-  /* 引入文章背景图 */
-  background-image: url('/images/articleBG.png'); 
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  /* 3. 加一层黑色遮罩，否则文字看不清 */
-  filter: brightness(0.6);
-  z-index: -1;
+.bg-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.6); z-index: 0; }
+
+/* 头部 */
+.header-bar {
+  height: 60px; flex-shrink: 0; z-index: 10;
+  display: flex; align-items: center; justify-content: center;
+  margin-top: 20px;
+}
+.page-title { font-size: 2rem; color: #fff; text-shadow: 2px 2px 0 #333; margin: 0; }
+
+/* 列表容器 */
+.list-container {
+  flex: 1; width: 100%; position: relative; z-index: 10;
+  display: flex; justify-content: center;
+  overflow-y: auto;
+  padding: 10px 0;
+  background: rgba(0,0,0,0.4);
+  box-shadow: inset 0 0 20px #000;
 }
 
-/* 顶部 HUD */
-.hud-header {
-  height: 80px; padding: 0 30px; 
-  display: flex; align-items: center; justify-content: space-between;
-  background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
-  z-index: 10;
-}
-.mc-btn { background: #555; border: 2px solid #fff; border-bottom-color: #333; border-right-color: #333; color: #fff; padding: 6px 15px; cursor: pointer; font-family: inherit; font-size: 1.2rem; }
-.hud-title { text-align: center; }
-.hud-title h1 { margin: 0; font-size: 2.5rem; color: #fec901; text-shadow: 2px 2px 0 #3e2723; }
-.subtitle { color: #aaa; font-size: 1.2rem; }
-.hud-spacer { width: 80px; }
+/* 隐藏滚动条 */
+.list-container::-webkit-scrollbar { width: 10px; background: #000; border-left: 2px solid #888; }
+.list-container::-webkit-scrollbar-thumb { background: #ccc; border: 2px solid #fff; border-right-color: #555; border-bottom-color: #555; }
 
-/* 主内容区 */
-.main-content {
-  flex: 1; display: flex; flex-direction: column; align-items: center;
-  padding: 20px 40px; overflow-y: hidden;
-}
+.world-list-wrapper { width: 100%; max-width: 700px; display: flex; flex-direction: column; gap: 4px; padding: 0 10px; }
 
-/* === 控制栏 (搜索 & 过滤) === */
-.control-bar {
-  width: 100%; max-width: 1000px;
-  display: flex; justify-content: space-between; align-items: center;
-  margin-bottom: 30px;
-  background: rgba(0,0,0,0.5); padding: 15px; border: 2px solid #555;
-}
+.loading-text { text-align: center; margin-top: 50px; font-size: 1.5rem; color: #aaa; }
 
-.search-box {
-  display: flex; align-items: center; background: #000; border: 2px solid #333; padding: 5px 10px;
+/* 单个存档条目 */
+.world-entry {
+  height: 80px; /* 单人模式列表稍微矮一点 */
+  background: rgba(0,0,0,0.5);
+  border: 2px solid transparent;
+  display: flex; align-items: center; gap: 12px;
+  padding: 4px; cursor: pointer;
+  position: relative;
 }
-.mc-input {
-  background: transparent; border: none; color: #fff; font-family: inherit; font-size: 1.2rem; outline: none; width: 200px; margin-left: 10px;
-}
+.world-entry:hover { border-color: #fff; background: #000; }
+.world-entry.selected { border: 2px solid #fff; background: #000; box-shadow: inset 0 0 10px rgba(255,255,255,0.1); }
+.world-entry.empty { height: 80px; opacity: 0; pointer-events: none; }
 
-.filter-tabs { display: flex; gap: 10px; }
-.tab-btn {
-  background: #333; border: 2px solid #555; color: #aaa; 
-  padding: 5px 15px; cursor: pointer; font-family: inherit; font-size: 1.1rem;
-  transition: all 0.2s;
-}
-.tab-btn.active {
-  background: #5c3317; border-color: #fec901; color: #fff; transform: translateY(-2px);
-}
+/* 图标 (正方形快照) */
+.world-icon { width: 72px; height: 72px; border: 1px solid #aaa; flex-shrink: 0; }
+.icon-img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
+.icon-placeholder { width: 100%; height: 100%; background: #555; display: flex; align-items: center; justify-content: center; color: #aaa; font-size: 0.8rem; }
 
-/* === 书架区域 (Grid) === */
-.bookshelf-area {
-  flex: 1; width: 100%; max-width: 1200px;
-  overflow-y: auto; /* 只有这里滚动 */
-  display: grid; 
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
-  gap: 30px; padding: 20px;
-  /* 隐藏滚动条 */
-  scrollbar-width: none;
-}
-.bookshelf-area::-webkit-scrollbar { display: none; }
+/* 信息 */
+.world-info { flex: 1; height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 2px; }
 
-/* 书本卡片 */
-.book-card {
-  background-color: rgba(30,30,30,0.85);
-  border: 4px solid #333;
-  display: flex; flex-direction: column;
-  position: relative; transition: transform 0.2s, box-shadow 0.2s;
-  cursor: pointer; height: 320px;
-}
-.book-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.6);
-  border-color: #777;
+.world-name { font-size: 1.5rem; color: #fff; text-shadow: 1px 1px 0 #333; line-height: 1.2; }
+.world-meta { font-size: 1.1rem; color: #aaa; }
+.world-mode { font-size: 1.1rem; color: #888; font-style: italic; }
+
+/* 底部按钮栏 */
+.footer-bar {
+  height: 140px; width: 100%; z-index: 20;
+  display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 10px;
+  background: url('/images/homeBG.png'); 
+  background-size: cover; background-position: bottom;
+  box-shadow: 0 -10px 20px rgba(0,0,0,0.5);
+  padding-bottom: 20px;
 }
 
-/* 分类颜色 */
-.book-card.tech { border-top-color: #55ffff; }
-.book-card.life { border-top-color: #ffaaff; }
+.btn-row { display: flex; gap: 10px; width: 600px; justify-content: space-between; }
 
-/* 书本封面图/Icon */
-.book-cover {
-  flex: 2; display: flex; align-items: center; justify-content: center;
-  background: rgba(0,0,0,0.3); border-bottom: 2px dashed #444;
-  position: relative; overflow: hidden;
+.mc-btn {
+  background: #777; border: 2px solid #fff; border-bottom-color: #333; border-right-color: #333;
+  color: #fff; padding: 6px 0; text-align: center; cursor: pointer; font-family: inherit; font-size: 1.2rem;
+  flex: 1; /* 均分宽度 */
+  text-shadow: 1px 1px 0 #333;
 }
-.book-icon { font-size: 80px; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.5)); z-index: 2; }
+.mc-btn:hover { background: #888; color: #ffffa0; }
+.mc-btn:active { border-top-color: #333; border-left-color: #333; border-bottom-color: #fff; border-right-color: #fff; transform: translateY(2px); }
+.mc-btn:disabled { color: #aaa; cursor: default; filter: brightness(0.7); transform: none; }
 
-/* 附魔光效 (CSS 动画) */
-.enchant-glint {
-  position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-  background: linear-gradient(45deg, transparent 45%, rgba(168, 56, 255, 0.2) 50%, transparent 55%);
-  animation: glint 3s infinite linear; z-index: 1;
+@media (max-width: 768px) {
+  .world-list-wrapper { width: 95%; }
+  .btn-row { width: 90%; flex-wrap: wrap; }
+  .mc-btn { min-width: 45%; }
 }
-@keyframes glint { 0% { transform: translate(-30%, -30%); } 100% { transform: translate(30%, 30%); } }
-
-/* 书本信息 */
-.book-info { flex: 3; padding: 15px; display: flex; flex-direction: column; }
-.book-title { margin: 0 0 15px 0; font-size: 1.4rem; color: #fff; line-height: 1.2; height: 3.6rem; overflow: hidden; }
-
-.book-meta { flex: 1; color: #aaa; font-size: 1rem; }
-.meta-row { display: flex; justify-content: space-between; margin-bottom: 5px; border-bottom: 1px solid #444; padding-bottom: 2px; }
-.value { color: #ddd; }
-.enchant-text { color: #b76bf7; font-family: monospace; font-weight: bold; } /* 附魔文字色 */
-
-.read-btn {
-  margin-top: auto; width: 100%;
-  background: #3e2723; border: 2px solid #5d4037; color: #eebb99;
-  padding: 8px; font-family: inherit; font-size: 1.2rem; cursor: pointer;
-  transition: background 0.2s;
-}
-.read-btn:hover { background: #5d4037; color: #fff; }
-
-.empty-state { grid-column: 1 / -1; text-align: center; font-size: 2rem; color: #666; margin-top: 50px; }
-.loading { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 2rem; }
 </style>

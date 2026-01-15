@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
-const { locale } = useI18n()
+const { locale, t } = useI18n()
 const BASE_URL = import.meta.env.BASE_URL || '/'
 
 // 切换语言
@@ -20,7 +20,8 @@ const handleNav = (path) => {
   audio.play().catch(() => {})
 
   setTimeout(() => {
-    router.push(path)
+    // 如果 path 还没准备好，可以先不做跳转
+    if (path) router.push(path)
   }, 200)
 }
 
@@ -31,35 +32,22 @@ const quitGame = () => {
   audio.play().catch(() => {})
 
   setTimeout(() => {
-    // 确保清理掉票据（虽然理论上已经没了）
     sessionStorage.removeItem('mc_one_time_sound')
     router.push('/')
   }, 200)
 }
 
 onMounted(() => {
-  // === 核心逻辑：验票 ===
-  
-  // 1. 看看口袋里有没有 Gateway 发的票
   const hasTicket = sessionStorage.getItem('mc_one_time_sound')
-
-  // 2. 如果有票，说明是刚从大门进来的
   if (hasTicket) {
     const bgm = new Audio(BASE_URL + 'sounds/achievement.ogg')
     bgm.volume = 0.6
-    
-    // 延迟一点播放，避免和点击声冲突
-    bgm.play()
-
-    // 3. 撕票！(最关键的一步)
-    // 删掉这个标记后：
-    // - 刷新页面 -> 没票 -> 不响
-    // - 子页面返回 -> 没票 -> 不响
-    // - 只有再次从 Gateway 点击进入，才会重新领到票
+    bgm.play().catch(() => {})
     sessionStorage.removeItem('mc_one_time_sound')
   }
 })
 </script>
+
 <template>
   <div class="mc-container">
     
@@ -75,19 +63,23 @@ onMounted(() => {
 
     <nav class="menu-list">
       <div class="mc-btn" @click="handleNav('/mc/articles')">
-        单人游戏 (文章)
+        {{ t('mc.menu_start') }}
       </div>
       
-      <div class="mc-btn">
-        多人联机 (留言板)
+      <div class="mc-btn" @click="handleNav('')">
+        {{ t('mc.menu_board') }}
+      </div>
+
+      <div class="mc-btn" @click="handleNav('/mc/projects')">
+        {{ t('mc.menu_projects') }}
       </div>
       
       <div class="mc-btn" @click="handleNav('/mc/about')">
-        材质包 (关于我)
+        {{ t('mc.menu_about') }}
       </div>
 
       <div class="mc-btn quit-btn" @click="quitGame">
-        退出游戏
+        {{ t('mc.menu_quit') }}
       </div>
     </nav>
 
@@ -104,7 +96,6 @@ onMounted(() => {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   height: 100vh; width: 100vw;
   font-family: 'VT323', monospace;
-  /* 如果图片已经移到了 public，建议改成 /images/homeBG.png */
   background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('/images/homeBG.png'); 
   background-size: cover; background-position: center;
   color: #fff; user-select: none;
@@ -155,9 +146,8 @@ h1.pixel-text {
   padding: 14px 0 10px 0;
 }
 
-/* 给退出按钮加点特殊样式（可选，如果不想要可以删掉） */
 .quit-btn {
-  margin-top: 20px; /* 和上面拉开点距离 */
+  margin-top: 20px;
 }
 
 .version-text { position: absolute; bottom: 20px; left: 20px; font-size: 18px; color: #fff; text-shadow: 2px 2px 0 #000; opacity: 0.8; }

@@ -2,6 +2,13 @@
 // 专门存放 Minecraft 主题的翻译
 export default {
   en: {
+    // --- 首页菜单 ---
+    menu_start: "Start Game (Articles)",
+    menu_board: "Multiplayer (Messages)", // ✨ 补回：留言板
+    menu_projects: "Projects (My Work)",  // ✨ 新增：项目工坊
+    menu_about: "Texture Packs (About)",
+    menu_quit: "Quit Game",
+
     back: 'Return to Hub',
     admin: '[Admin]',
     location: 'Suzhou, China',
@@ -39,6 +46,13 @@ export default {
     ]
   },
   zh: {
+    // --- 首页菜单 ---
+    menu_start: "单人游戏 (文章)",
+    menu_board: "多人联机 (留言板)",    // ✨ 补回：留言板
+    menu_projects: "项目工坊 (我的项目)", // ✨ 新增：项目工坊
+    menu_about: "材质包 (关于)",
+    menu_quit: "退出游戏",
+
     back: '返回大厅',
     admin: '[管理员]',
     location: '江苏 苏州',

@@ -2,11 +2,10 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-// 1. 引入 Prism 组件
 import Prism from '@/components/vue-bits/Prism.vue'
 
 const router = useRouter()
-const { t, tm } = useI18n()
+const { t, tm } = useI18n() 
 const isLoading = ref(true)
 const showDialog = ref(false)
 const dialogText = ref('')
@@ -33,9 +32,8 @@ const fetchProfileData = () => {
     setTimeout(() => {
       resolve({
         username: 'biscuit',
-        // 注意：这个皮肤图片必须是背景透明的 PNG，否则遮罩会失效
-        skinUrl: 'https://minotar.net/armor/body/conedox/100.png',
-
+        skinUrl: 'https://minotar.net/armor/body/conedox/100.png', 
+        
         stats: [
           { labelKey: 'mc.stat_code', value: '1.2M', icon: '📜' },
           { labelKey: 'mc.stat_bug', value: '404', icon: '🕷️' },
@@ -71,7 +69,7 @@ const fetchProfileData = () => {
   })
 }
 
-const profile = ref({ username: '', skinUrl: '', stats: [], advancements: [], skills: [], photos: [] })
+const profile = ref({ stats: [], advancements: [], skills: [], photos: [] })
 
 onMounted(async () => {
   profile.value = await fetchProfileData()
@@ -79,7 +77,7 @@ onMounted(async () => {
 })
 
 const handleCharClick = () => {
-  const quotes = tm('mc.npc_quotes')
+  const quotes = tm('mc.npc_quotes') 
   const randomQuote = quotes[Math.floor(Math.random() * quotes.length)]
   dialogText.value = randomQuote
   showDialog.value = true
@@ -90,15 +88,22 @@ const mineBlock = (index) => {
   const skill = profile.value.skills[index]
   if (skill.isMined) return
   const el = document.getElementById(`ore-${index}`)
-  if (el) {
+  if(el) {
     el.classList.remove('shake-anim')
-    void el.offsetWidth
+    void el.offsetWidth 
     el.classList.add('shake-anim')
   }
   setTimeout(() => { skill.isMined = true }, 300)
 }
 
 const goBack = () => router.push('/mc')
+
+const openLink = (type) => {
+  playClick()
+  if (type === 'github') window.open('https://github.com/yourname', '_blank')
+  if (type === 'wechat') alert('WeChat ID: biscuit_dev') 
+  if (type === 'bilibili') window.open('https://bilibili.com', '_blank')
+}
 </script>
 
 <template>
@@ -146,14 +151,18 @@ const goBack = () => router.push('/mc')
       </div>
 
       <div class="right-column">
+        
         <div class="section-box stone-bg">
           <div class="section-header">🏆 {{ t('mc.adv_title') }}</div>
           <div class="advancement-scroll-area">
             <div class="tree-line"></div>
-            <div v-for="(adv, idx) in profile.advancements" :key="idx" class="adv-node-wrapper" :class="{
-              'first-item': idx === 0,
-              'last-item': idx === profile.advancements.length - 1
-            }" @mouseenter="playHover">
+            <div 
+              v-for="(adv, idx) in profile.advancements" 
+              :key="idx" 
+              class="adv-node-wrapper"
+              :class="{ 'first-item': idx === 0, 'last-item': idx === profile.advancements.length - 1 }"
+              @mouseenter="playHover"
+            >
               <div class="adv-icon-box" :class="adv.type">
                 <div class="adv-icon">{{ adv.icon }}</div>
               </div>
@@ -169,9 +178,15 @@ const goBack = () => router.push('/mc')
         <div class="section-box cobble-bg">
           <div class="section-header">⛏️ {{ t('mc.mining_title') }}</div>
           <div class="ore-grid">
-            <div v-for="(skill, index) in profile.skills" :key="index" :id="`ore-${index}`" class="ore-block"
-              :class="[`ore-${skill.oreType}`, { 'broken': skill.isMined }]" @click="mineBlock(index)"
-              @mouseenter="playHover">
+            <div 
+              v-for="(skill, index) in profile.skills" 
+              :key="index"
+              :id="`ore-${index}`"
+              class="ore-block"
+              :class="[`ore-${skill.oreType}`, { 'broken': skill.isMined }]"
+              @click="mineBlock(index)"
+              @mouseenter="playHover"
+            >
               <div class="block-face" v-if="!skill.isMined">
                 <div class="ore-specks"></div>
               </div>
@@ -183,19 +198,27 @@ const goBack = () => router.push('/mc')
           </div>
         </div>
 
-        <div class="section-box wood-bg">
-          <div class="section-header">🖼️ {{ t('mc.gallery_title') }}</div>
-          <div class="photo-grid">
-            <div v-for="(photo, index) in profile.photos" :key="photo.id" class="painting-frame" :style="{ animationDelay: `${index * 0.1}s` }">
-              <img :src="photo.url" class="painting-img" loading="lazy" />
-              <div class="painting-label">{{ photo.title }}</div>
-            </div>
+        <div class="section-box obsidian-bg">
+          <div class="section-header">🛸 {{ t('mc.about.social_title') }}</div>
+          <div class="portal-grid">
+            <button class="portal-card" @click="openLink('github')">
+              <span class="p-icon">🐱</span>
+              <span class="p-text">{{ t('mc.about.social_github') }}</span>
+            </button>
+            <button class="portal-card" @click="openLink('wechat')">
+              <span class="p-icon">💬</span>
+              <span class="p-text">{{ t('mc.about.social_wechat') }}</span>
+            </button>
+            <button class="portal-card" @click="openLink('bilibili')">
+              <span class="p-icon">📺</span>
+              <span class="p-text">{{ t('mc.about.social_bilibili') }}</span>
+            </button>
           </div>
         </div>
 
       </div>
     </div>
-
+    
     <div v-if="isLoading" class="loading">{{ t('mc.loading') }}</div>
   </div>
 </template>
@@ -205,220 +228,44 @@ const goBack = () => router.push('/mc')
 
 /* === 全局容器 === */
 .mc-container {
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
+  width: 100vw; height: 100vh; overflow: hidden;
   background-color: #1a1a1a;
   background-image: url('/images/aboutBG.png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  box-shadow: inset 0 0 0 1000px rgba(0, 0, 0, 0.6);
-  font-family: 'VT323', monospace;
-  color: #fff;
+  background-size: cover; background-position: center;
+  box-shadow: inset 0 0 0 1000px rgba(0, 0, 0, 0.65);
+  font-family: 'VT323', monospace; color: #fff;
 }
 
-.hud-header {
-  height: 60px;
-  flex-shrink: 0;
-  padding: 0 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: rgba(0, 0, 0, 0.6);
-  border-bottom: 2px solid #000;
-  z-index: 50;
-}
+.hud-header { height: 60px; flex-shrink: 0; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.6); border-bottom: 2px solid #000; z-index: 50; }
+.mc-btn { background: #777; border: 2px solid #fff; border-bottom-color: #333; border-right-color: #333; color: #fff; padding: 6px 15px; cursor: pointer; font-family: inherit; font-size: 1.2rem; }
 
-.mc-btn {
-  background: #777;
-  border: 2px solid #fff;
-  border-bottom-color: #333;
-  border-right-color: #333;
-  color: #fff;
-  padding: 6px 15px;
-  cursor: pointer;
-  font-family: inherit;
-  font-size: 1.2rem;
-}
+.main-content { display: flex; height: calc(100vh - 60px); width: 100%; }
 
-.main-content {
-  display: flex;
-  height: calc(100vh - 60px);
-  width: 100%;
-}
+/* === 左侧 === */
+.left-column { width: 340px; flex-shrink: 0; background: rgba(0, 0, 0, 0.4); border-right: 4px solid #1a1a1a; display: flex; flex-direction: column; align-items: center; padding-top: 80px; gap: 50px; position: relative; z-index: 20; overflow-y: auto; -ms-overflow-style: none; scrollbar-width: none; }
+.left-column::-webkit-scrollbar { display: none; }
 
-/* === 左侧：角色区域 === */
-.left-column {
-  width: 340px;
-  flex-shrink: 0;
-  background: rgba(0, 0, 0, 0.4);
-  border-right: 4px solid #1a1a1a;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-top: 80px;
-  gap: 50px;
-  position: relative;
-  z-index: 20;
-  overflow-y: auto;
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
+.char-wrapper { position: relative; cursor: pointer; text-align: center; margin-bottom: 20px; }
+.hologram-wrapper { position: relative; height: 280px; width: 320px; margin: 0 auto; z-index: 2; display: flex; justify-content: center; align-items: flex-end; }
+.prism-rotator { position: absolute; width: 280px; height: 280px; top: 50%; left: 50%; transform-origin: center center; animation: prism-spin 18s linear infinite; z-index: 1; mask-image: radial-gradient(circle, black 30%, transparent 75%); }
+.character-prism-case { width: 100%; height: 100%; filter: blur(28px) brightness(1.3); mix-blend-mode: screen; opacity: 0.7; }
+@keyframes prism-spin { 0% { transform: translate(-50%, -50%) rotate(0deg) scale(1); } 50% { transform: translate(-50%, -50%) rotate(180deg) scale(1.1); } 100% { transform: translate(-50%, -50%) rotate(360deg) scale(1); } }
+.skin-model { height: 240px; width: auto; position: relative; z-index: 2; image-rendering: pixelated; margin-bottom: 10px; filter: drop-shadow(0 0 10px rgba(0, 255, 255, 0.4)); }
+.floating { animation: float 3s ease-in-out infinite; }
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+.speech-bubble { position: absolute; top: -90px; left: 50%; transform: translateX(-50%); background: #fff; color: #000; padding: 10px; border-radius: 4px; border: 2px solid #000; width: 200px; text-align: center; z-index: 9999; box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.4); }
+.speech-bubble::before { content: ''; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); border-width: 10px 10px 0; border-style: solid; border-color: #000 transparent transparent; }
+.nametag { display: inline-block; background: rgba(0, 0, 0, 0.6); padding: 2px 8px; border: 1px solid #aaa; margin-bottom: 15px; position: relative; z-index: 10; }
+.pedestal { width: 140px; height: 30px; background: #333; border: 2px solid #111; transform: perspective(300px) rotateX(40deg) translateY(-25px); margin: 0 auto; z-index: 0; position: relative; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+.soft-spotlight { position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%) scaleY(0.4); width: 320px; height: 200px; background: radial-gradient(circle, rgba(0, 255, 255, 0.3) 0%, rgba(0, 150, 255, 0.1) 50%, transparent 70%); filter: blur(25px); z-index: 0; }
 
-.left-column::-webkit-scrollbar {
-  display: none;
-}
-
-.char-wrapper {
-  position: relative;
-  cursor: pointer;
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-/* 3. 全息小人样式核心 */
-.hologram-wrapper {
-  position: relative;
-  height: 280px; 
-  width: 320px; /* 稍微加宽容器，允许光影流转 */
-  margin: 0 auto;
-  z-index: 2;
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-}
-
-/* ✨✨✨ 核心修改：动态模糊旋转光束（Vue-Bits 视频效果） ✨✨✨ */
-
-/* 旋转容器：负责整体的旋转和缩放动画 */
-.prism-rotator {
-  position: absolute;
-  width: 280px;
-  height: 280px;
-  top: 50%;
-  left: 50%;
-  transform-origin: center center;
-  /* 旋转+轻微跳动的动画，让光影看起来是活的 */
-  animation: prism-spin 18s linear infinite;
-  z-index: 1;
-  
-  /* 关键点：使用径向遮罩消除硬边界，实现羽化效果 */
-  -webkit-mask-image: radial-gradient(circle, black 30%, transparent 75%);
-  mask-image: radial-gradient(circle, black 30%, transparent 75%);
-}
-
-.character-prism-case {
-  width: 100%;
-  height: 100%;
-  
-  /* ✨ 关键：强力模糊滤镜，让 Prism 内部的色块融合，没有固定形状 */
-  filter: blur(28px) brightness(1.3);
-  
-  /* ✨ 关键：混合模式，让光线像空气中散射一样，而不是覆盖背景 */
-  mix-blend-mode: screen; 
-  
-  opacity: 0.7;
-}
-
-/* 旋转动画定义 */
-@keyframes prism-spin {
-  0% { transform: translate(-50%, -50%) rotate(0deg) scale(1); }
-  50% { transform: translate(-50%, -50%) rotate(180deg) scale(1.1); }
-  100% { transform: translate(-50%, -50%) rotate(360deg) scale(1); }
-}
-
-/* 皮肤叠加层 */
-.skin-model {
-  height: 240px; 
-  width: auto;
-  position: relative;
-  z-index: 2; 
-  image-rendering: pixelated;
-  margin-bottom: 10px; 
-  /* 角色带一点点柔和的背光 */
-  filter: drop-shadow(0 0 10px rgba(0, 255, 255, 0.4));
-}
-
-.floating {
-  animation: float 3s ease-in-out infinite;
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-}
-
-/* 气泡 */
-.speech-bubble {
-  position: absolute;
-  top: -90px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #fff;
-  color: #000;
-  padding: 10px;
-  border-radius: 4px;
-  border: 2px solid #000;
-  width: 200px;
-  text-align: center;
-  z-index: 9999;
-  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.4);
-}
-
-.speech-bubble::before {
-  content: '';
-  position: absolute;
-  bottom: -10px;
-  left: 50%;
-  transform: translateX(-50%);
-  border-width: 10px 10px 0;
-  border-style: solid;
-  border-color: #000 transparent transparent;
-}
-
-.nametag {
-  display: inline-block;
-  background: rgba(0, 0, 0, 0.6);
-  padding: 2px 8px;
-  border: 1px solid #aaa;
-  margin-bottom: 15px;
-  position: relative;
-  z-index: 10;
-}
-
-.pedestal {
-  width: 140px;
-  height: 30px;
-  background: #333;
-  border: 2px solid #111;
-  transform: perspective(300px) rotateX(40deg) translateY(-25px);
-  margin: 0 auto;
-  z-index: 0;
-  position: relative;
-  box-shadow: 0 10px 20px rgba(0,0,0,0.5);
-}
-
-/* 灯光效果微调 - 配合强光束，底部的光也可以更聚焦一点 */
-.soft-spotlight {
-  position: absolute;
-  bottom: -20px;
-  left: 50%;
-  transform: translateX(-50%) scaleY(0.4);
-  width: 320px;
-  height: 200px;
-  background: radial-gradient(circle, rgba(0, 255, 255, 0.3) 0%, rgba(0, 150, 255, 0.1) 50%, transparent 70%);
-  filter: blur(25px); 
-  z-index: 0;
-}
-
-/* ... (右侧样式保持完全不变) ... */
 .stats-board { width: 260px; background: #c6c6c6; border: 2px solid #000; box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.5); position: relative; z-index: 10; }
 .board-header { background: #444; color: #fff; text-align: center; padding: 5px; font-size: 1.2rem; }
 .stats-list { padding: 10px; display: flex; flex-direction: column; gap: 5px; color: #333; }
 .stat-row { display: flex; justify-content: space-between; border-bottom: 1px dashed #888; }
 .stat-value { font-weight: bold; color: #008800; }
 
+/* === 右侧 === */
 .right-column { flex: 1; padding: 30px 40px; overflow-y: auto; display: flex; flex-direction: column; gap: 40px; }
 .right-column::-webkit-scrollbar { width: 12px; background: #111; }
 .right-column::-webkit-scrollbar-thumb { background: #666; border: 2px solid #111; }
@@ -427,6 +274,7 @@ const goBack = () => router.push('/mc')
 .stone-bg { background-image: repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.02) 0, rgba(255, 255, 255, 0.02) 10px, transparent 10px, transparent 20px); }
 .section-header { font-size: 1.8rem; color: #eee; margin-bottom: 10px; text-shadow: 2px 2px 0 #000; display: inline-block; border-bottom: 3px solid #555; }
 
+/* 成就树 */
 .advancement-scroll-area { display: flex; align-items: center; gap: 60px; padding: 100px 20px 40px 20px; margin-top: -60px; overflow-x: auto; min-height: 150px; }
 .tree-line { position: absolute; top: 60%; left: 0; width: 100%; height: 4px; background: #000; z-index: 0; }
 .adv-node-wrapper { position: relative; width: 64px; height: 64px; flex-shrink: 0; z-index: 1; display: flex; align-items: center; justify-content: center; }
@@ -436,14 +284,18 @@ const goBack = () => router.push('/mc')
 .adv-node-wrapper:hover .adv-icon-box { background: #555; transform: scale(1.1); }
 .adv-icon { font-size: 30px; filter: drop-shadow(2px 2px 0 #000); }
 
+/* 修复 Tooltip */
 .adv-popup { position: absolute; bottom: 85px; left: 50%; transform: translateX(-50%); width: 220px; background: #100010; border: 2px solid #50f; padding: 8px; opacity: 0; pointer-events: none; transition: opacity 0.2s; text-align: center; z-index: 999; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.8); }
 .adv-node-wrapper.first-item .adv-popup { left: 0; transform: none; text-align: center; }
 .adv-node-wrapper.last-item .adv-popup { left: auto; right: 0; transform: none; text-align: center; }
 .adv-node-wrapper:hover .adv-popup { opacity: 1; }
+/* 🔥 关键修复：悬停时极大提高层级，保证盖住兄弟节点 */
+.adv-node-wrapper:hover { z-index: 100; }
 .adv-title { color: #ff5; margin-bottom: 4px; font-weight: bold; }
 .adv-desc { font-size: 0.9rem; color: #ccc; }
 .adv-date { font-size: 0.8rem; color: #888; margin-top: 5px; }
 
+/* 矿石 */
 .ore-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 15px; }
 .ore-block { width: 100%; aspect-ratio: 1; background-color: #757575; position: relative; cursor: pointer; box-shadow: inset 4px 4px 0 rgba(255, 255, 255, 0.2), inset -4px -4px 0 rgba(0, 0, 0, 0.4); }
 .ore-block:hover { filter: brightness(1.1); }
@@ -457,11 +309,19 @@ const goBack = () => router.push('/mc')
 .revealed-content img { width: 40px; margin-bottom: 5px; }
 .revealed-content span { display: block; font-size: 0.8rem; color: #ddd; }
 
-.photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
-.painting-frame { background: #5c3317; padding: 8px; box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5); transition: transform 0.2s; cursor: pointer; animation: pop-in 0.5s backwards; }
-.painting-frame:hover { transform: scale(1.03) rotate(1deg); z-index: 10; }
-.painting-img { width: 100%; height: 150px; object-fit: cover; border: 2px solid #3e220e; display: block; }
-.painting-label { text-align: center; margin-top: 5px; color: #eebb99; font-size: 1.1rem; }
+/* 社交传送门 */
+.portal-grid { display: flex; gap: 20px; justify-content: flex-start; flex-wrap: wrap; }
+.portal-card {
+  background: #222; border: 2px solid #a0a; border-bottom-color: #505; border-right-color: #505;
+  color: #d4aaff; padding: 15px 25px; cursor: pointer;
+  display: flex; align-items: center; gap: 10px;
+  font-family: inherit; font-size: 1.4rem;
+  transition: transform 0.1s;
+  box-shadow: 0 0 10px rgba(160, 0, 160, 0.2);
+}
+.portal-card:hover { background: #303; color: #fff; transform: translateY(-2px); box-shadow: 0 0 15px rgba(160, 0, 160, 0.6); }
+.portal-card:active { transform: translateY(2px); border-color: #505; }
+.p-icon { font-size: 1.6rem; }
 
 @keyframes pop-in { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 .loading { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 2rem; }
