@@ -86,7 +86,7 @@ const handleDelete = () => {
 }
 
 const confirmDelete = () => {
-  playSound('mine_stone.ogg') 
+  playSound('explode.ogg') 
   articles.value = articles.value.filter(a => a.id !== selectedId.value)
   selectedId.value = null
   showDeleteModal.value = false
@@ -106,7 +106,7 @@ const saveEdit = () => {
   const target = articles.value.find(a => a.id === selectedId.value)
   if (target) {
     target.title = editName.value
-    playSound('achievement.ogg')
+    playSound('anvil_use.ogg')
   }
   showEditModal.value = false
 }

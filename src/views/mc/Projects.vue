@@ -2,7 +2,8 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-
+// 記得先確保有獲取 baseUrl
+const baseUrl = import.meta.env.BASE_URL
 const router = useRouter()
 const { t } = useI18n()
 
@@ -10,7 +11,7 @@ const { t } = useI18n()
 const projects = ref([
   {
     id: 1,
-    icon: 'images/redstone_dust.png', // 暂时用图片路径，没有图片会裂开，可以换成 emoji 测试
+    icon: `${baseUrl}images/redstone_dust.png`, // 暂时用图片路径，没有图片会裂开，可以换成 emoji 测试
     emoji: '⚡', // 备用 Emoji
     nameKey: 'p1_name',
     descKey: 'p1_desc',
@@ -21,7 +22,7 @@ const projects = ref([
   },
   {
     id: 2,
-    icon: 'images/painting.png',
+    icon: `${baseUrl}images/painting.png`,
     emoji: '🎨',
     nameKey: 'p2_name',
     descKey: 'p2_desc',
@@ -32,7 +33,7 @@ const projects = ref([
   },
   {
     id: 3,
-    icon: 'images/sword.png',
+    icon: '',
     emoji: '🐹',
     nameKey: 'p3_name',
     descKey: 'p3_desc',
@@ -82,7 +83,8 @@ const openProject = (url) => {
           class="crafting-slot"
         >
           <div class="slot-icon">
-            <span class="pixel-icon">{{ p.emoji }}</span>
+          <img v-if="p.icon" :src="p.icon" class="item-img" alt="icon" />
+  <span v-else class="pixel-icon">{{ p.emoji }}</span>
           </div>
 
           <div class="slot-info">
@@ -239,6 +241,14 @@ const openProject = (url) => {
   margin-right: 25px;
   flex-shrink: 0;
   box-shadow: inset 4px 4px 0 rgba(0,0,0,0.2);
+}
+/* 🔥 请补上这个 class！ */
+.item-img {
+  width: 80%;  /* 限制宽度为格子的 80% */
+  height: 80%; /* 限制高度 */
+  object-fit: contain; /* 保持图片比例 */
+  image-rendering: pixelated; /* 像素风格渲染，防止模糊 */
+  filter: drop-shadow(4px 4px 0 rgba(0,0,0,0.3)); /* 加一点阴影，更有物品感 */
 }
 .pixel-icon { font-size: 4rem; filter: drop-shadow(4px 4px 0 rgba(0,0,0,0.3)); }
 
