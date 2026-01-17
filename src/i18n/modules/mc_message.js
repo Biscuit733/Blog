@@ -23,6 +23,8 @@ export default {
     label_name: "服务器名称 (昵称)",
     label_ip: "服务器地址 (内容)",
     btn_done: "完成",
+    btn_edit: "编辑",
+    btn_delete: "删除",
     
     // 模拟数据
     msg1_author: "Creeper_AwMan",
@@ -49,6 +51,8 @@ export default {
     label_name: "Server Name (Nick)",
     label_ip: "Server Address (Msg)",
     btn_done: "Done",
+    btn_edit: "Edit",
+    btn_delete: "Delete",
     
     msg1_author: "Creeper_AwMan",
     msg1_content: "§a[Pinned] §fIs this the legendary Vue Blog?\n§eAmazing! SSSSsssss.... BOOM!",
