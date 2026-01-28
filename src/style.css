@@ -1,3 +1,6 @@
+/* ✅ 替换为 v4 专用写法 */
+@import "tailwindcss";
+
 body{
   margin: 0;
 }

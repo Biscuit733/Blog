@@ -1,7 +1,8 @@
 <script setup>
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
-import McCursor from './components/McCursor.vue' // 引入刚才写的组件
+// import McCursor from './components/McCursor.vue' // 引入刚才写的组件
+import McCursor from './components/mc/McCursor.vue'
 
 const route = useRoute()
 

@@ -1,26 +1,26 @@
 // src/router/index.js
 import { createRouter, createWebHistory } from 'vue-router'
-const McProjects = () => import('../views/mc/Projects.vue') // 📦 懒加载引入
-// 懒加载引入（更高效）
-const Gateway = () => import('../views/Gateway.vue')
-const McHome = () => import('../views/mc/Home.vue')
-const McMessages = () => import('../views/mc/Messages.vue')
-const TechHome = () => import('../views/tech/Home.vue')
+
+// 移除原本顶部的 const McProjects = ... 这种写法，全部下放
+// 这样顶部很清爽，只有核心库引入
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
+    // === 公共/入口区域 ===
     {
       path: '/',
       name: 'gateway',
-      component: Gateway,
+      component: () => import('../views/Gateway.vue'), // 统一使用这种写法
       meta: { theme: 'default' }
     },
+
+    // === MC 像素世界区域 ===
     {
       path: '/mc',
       name: 'mc-home',
-      component: McHome,
-      meta: { theme: 'pixel' } // 标记：这是像素世界
+      component: () => import('../views/mc/Home.vue'),
+      meta: { theme: 'pixel' }
     },
     {
       path: '/mc/about',
@@ -28,11 +28,10 @@ const router = createRouter({
       component: () => import('../views/mc/About.vue'),
       meta: { theme: 'pixel' }
     },
-    // ✨✨✨ 新增路由开始 ✨✨✨
     {
       path: '/mc/projects',
       name: 'mc-projects',
-      component: McProjects,
+      component: () => import('../views/mc/Projects.vue'),
       meta: { theme: 'pixel' }
     },
     {
@@ -40,9 +39,9 @@ const router = createRouter({
       name: 'mc-articles',
       component: () => import('../views/mc/Articles.vue'),
       meta: { theme: 'pixel' }
-    },// 在 routes 数组中添加
+    },
     {
-      path: '/mc/articles/:id', // 动态参数 :id
+      path: '/mc/articles/:id',
       name: 'mc-article-detail',
       component: () => import('../views/mc/ArticleDetail.vue'),
       meta: { theme: 'pixel' }
@@ -50,21 +49,45 @@ const router = createRouter({
     {
       path: '/mc/messages',
       name: 'mc-messages',
-      component: McMessages,
+      component: () => import('../views/mc/Messages.vue'),
       meta: { theme: 'pixel' }
     },
+
+    // === Tech 现代科技区域 ===
     {
       path: '/tech',
       name: 'tech-home',
-      component: TechHome,
-      meta: { theme: 'modern' } // 标记：这是现代世界
+      component: () => import('../views/tech/Home.vue'),
+      meta: { theme: 'modern' }
+    },
+    {
+      path: '/tech/archive',
+      name: 'tech-archive',
+      component: () => import('../views/tech/Archive.vue'),
+      meta: { theme: 'modern' }
+    },
+    {
+      path: '/tech/links',
+      name: 'tech-links',
+      component: () => import('../views/tech/Links.vue'),
+      meta: { theme: 'modern' }
+    },
+    {
+      path: '/tech/my',
+      name: 'tech-my',
+      component: () => import('../views/tech/My.vue'),
+      meta: { theme: 'modern' }
+    },
+    {
+      path: '/tech/about',
+      name: 'tech-about',
+      component: () => import('../views/tech/About.vue'),
+      meta: { theme: 'modern' }
     }
   ]
 })
 
-// --- 全局样式切换魔法 ---
-// 每次路由跳转后，根据 meta.theme 自动修改 body 的 class
-// 这样你的 MC 字体就不会污染 现代风格 页面了
+// 全局样式切换守卫（保持不变，这部分写得很好）
 router.afterEach((to) => {
   const theme = to.meta.theme || 'default'
   document.body.className = theme

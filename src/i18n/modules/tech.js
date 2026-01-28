@@ -2,8 +2,25 @@
 export default {
   zh: {
     // 标题
+    blogTitle: "biscuit",
     welcome: "系统就绪",
     designation: "全栈开发 / 赛博构建者",
+    
+    // 菜单项
+    menu: {
+      home: "主页",
+      archive: "归档",
+      links: "链接",
+      my: "我的",
+      about: "关于",
+      other: "其他"
+    },
+    
+    // 主页文字
+    hero: {
+      title: "Who am I?!",
+      subtitle: "Searching for meaning in the digital void"
+    },
     
     // 模块标题
     headers: {
@@ -34,9 +51,28 @@ export default {
     btn_email: "发送信号"
   },
   en: {
+    // 标题
+    blogTitle: "biscuit",
     welcome: "SYSTEM READY",
     designation: "Full Stack Dev / Cyber Architect",
     
+    // 菜单项
+    menu: {
+      home: "Home",
+      archive: "Archive",
+      links: "Links",
+      my: "My",
+      about: "About",
+      other: "Other"
+    },
+    
+    // 主页文字
+    hero: {
+      title: "Who am I?!",
+      subtitle: "Searching for meaning in the digital void"
+    },
+    
+    // 模块标题
     headers: {
       about: "IDENTITY",
       stack: "TECH STACK",
@@ -45,18 +81,21 @@ export default {
       logs: "SYSTEM LOGS"
     },
 
+    // 个人简介
     bio: {
       p1: "Initializing neural link...",
       p2: "Access granted. Codename biscuit. Focusing on building digital logic and visual interfaces.",
       location: "Loc: Zhejiang, CN"
     },
 
+    // 状态
     status: {
       online: "ONLINE",
       coding: "COMPILING...",
       afk: "AFK"
     },
 
+    // 按钮
     btn_enter: "ACCESS",
     btn_github: "REPO",
     btn_email: "SIGNAL"
